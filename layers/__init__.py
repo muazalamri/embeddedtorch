@@ -9,8 +9,13 @@ class EmbaeddableModel(nn.Module):
         for layer in self.list:
             x = layer(x)
         return x
-    def to_cpp(self):
-        
+    def to_cpp(self,arch):
+        code=""
+        prams=""
+        for layer in self.list:
+            code+=layer.to_cpp()+"\n"
+            prams+=layer.cpp_pram(arch)
+        return code,prams
 class LinearLayer(nn.Module):
     def __init__(self, in_features, out_features, bias=True,dtype=torch.float32):
         super(LinearLayer, self).__init__()
