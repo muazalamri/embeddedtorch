@@ -1,3 +1,5 @@
+#ifndef EIGEN_USE_THREADS
+#define EIGEN_USE_THREADS
 #include <iostream>
 #include <unsupported/Eigen/CXX11/Tensor>
 #include <limits>
@@ -398,6 +400,8 @@ Conv(const Eigen::Tensor<T, InputRank> &input,
 
     return output;
 }
+#ifdef TEST_FUNC
+#define TEST_FUNC_MAIN
 int main()
 {
     std::cout << "Eigen Tensor Operations Example" << std::endl;
@@ -453,3 +457,5 @@ int main()
               << E << std::endl;
     return 0;
 }
+#endif
+#endif
