@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
+from cpp import tensor2cpp,linear2cpp
 class EmbaeddableModel(nn.Module):
     def __init__(self, dtype):
         super().__init__()
@@ -20,10 +21,12 @@ class LinearLayer(nn.Module):
     def __init__(self, in_features, out_features, bias=True,dtype=torch.float32):
         super(LinearLayer, self).__init__()
         self.linear = nn.Linear(in_features, out_features, bias=bias).to(dtype)
+        self.cpp_name = "linear"
     def forward(self, x):
         return self.linear(x)
-    def to_cpp(self):
-        return f"linear(x, weight, bias)" if self.linear.bias is not None else "linear(x, weight)"
+    def to_cpp(self,layer_num):
+        return linear2cpp(self.linear,layer_num)
+    
 class flattenLayer(torch.nn.Module):
     def __init__(self,dim=1,dtype=torch.float32):
         super(flattenLayer, self).__init__()
