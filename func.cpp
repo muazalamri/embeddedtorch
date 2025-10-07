@@ -10,7 +10,7 @@ using namespace Eigen;
 
 // tensor adding
 template <typename T, int Rank>
-Eigen::Tensor<T, Rank> addTensors(const Eigen::Tensor<T, Rank> &A,
+inline Eigen::Tensor<T, Rank> addTensors(const Eigen::Tensor<T, Rank> &A,
                                   const Eigen::Tensor<T, Rank> &B)
 {
     assert(A.dimensions() == B.dimensions() && "Tensors must have same shape");
@@ -18,20 +18,20 @@ Eigen::Tensor<T, Rank> addTensors(const Eigen::Tensor<T, Rank> &A,
 }
 // tensor reshaping
 template <typename T, int Rank, int NewRank>
-Eigen::Tensor<T, NewRank> reshapeTensor(const Eigen::Tensor<T, Rank> &A,
+inline Eigen::Tensor<T, NewRank> reshapeTensor(const Eigen::Tensor<T, Rank> &A,
                                         const Eigen::array<Eigen::Index, NewRank> &newDims)
 {
     return A.reshape(newDims);
 }
 // matrix * scalar
 template <typename T, int Rank>
-Eigen::Tensor<T, Rank> scaleTensor(const Eigen::Tensor<T, Rank> &A, T scalar)
+inline Eigen::Tensor<T, Rank> scaleTensor(const Eigen::Tensor<T, Rank> &A, T scalar)
 {
     return A * scalar;
 }
 // tensor slicing
 template <typename T, int Rank>
-Eigen::Tensor<T, Rank> sliceTensor(const Eigen::Tensor<T, Rank> &A,
+inline Eigen::Tensor<T, Rank> sliceTensor(const Eigen::Tensor<T, Rank> &A,
                                    const Eigen::array<Eigen::Index, Rank> &offsets,
                                    const Eigen::array<Eigen::Index, Rank> &extents)
 {
@@ -39,7 +39,7 @@ Eigen::Tensor<T, Rank> sliceTensor(const Eigen::Tensor<T, Rank> &A,
 }
 // tensor contraction (generalized matrix multiplication)
 template <typename T, int RankA, int RankB, int RankC>
-Eigen::Tensor<T, RankC> contractTensors(const Eigen::Tensor<T, RankA> &A,
+inline Eigen::Tensor<T, RankC> contractTensors(const Eigen::Tensor<T, RankA> &A,
                                         const Eigen::Tensor<T, RankB> &B,
                                         const Eigen::array<Eigen::IndexPair<int>, 1> &contractDims)
 {
@@ -47,19 +47,19 @@ Eigen::Tensor<T, RankC> contractTensors(const Eigen::Tensor<T, RankA> &A,
 }
 // ReLU activation
 template <typename T, int Rank>
-Eigen::Tensor<T, Rank> relu(const Eigen::Tensor<T, Rank> &A)
+inline Eigen::Tensor<T, Rank> relu(const Eigen::Tensor<T, Rank> &A)
 {
     return A.cwiseMax(static_cast<T>(0));
 }
 // Sigmoid activation
 template <typename T, int Rank>
-Eigen::Tensor<T, Rank> sigmoid(const Eigen::Tensor<T, Rank> &A)
+inline Eigen::Tensor<T, Rank> sigmoid(const Eigen::Tensor<T, Rank> &A)
 {
     return static_cast<T>(1) / (static_cast<T>(1) + (-A).exp());
 }
 // Tanh activation
 template <typename T, int Rank>
-Eigen::Tensor<T, Rank> tanh(const Eigen::Tensor<T, Rank> &A)
+inline Eigen::Tensor<T, Rank> tanh(const Eigen::Tensor<T, Rank> &A)
 {
     return A.tanh();
 }
@@ -99,7 +99,7 @@ Eigen::Tensor<T, Rank> softmax(const Eigen::Tensor<T, Rank> &input, int axis)
     return normalized;
 }
 template <typename T, int InputRank, int OutputRank>
-Eigen::Tensor<T, OutputRank> linearLayer(const Eigen::Tensor<T, InputRank> &input,
+inline Eigen::Tensor<T, OutputRank> linearLayer(const Eigen::Tensor<T, InputRank> &input,
                                          const Eigen::Tensor<T, 2> &weights,
                                          const Eigen::Tensor<T, 1> &bias)
 {

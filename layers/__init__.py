@@ -17,11 +17,16 @@ class EmbaeddableModel(nn.Module):
             code+=layer.to_cpp()+"\n"
             prams+=layer.cpp_pram(arch)
         return code,prams
+    def add_layer(self,layer):
+        self.list.append(layer)
 class LinearLayer(nn.Module):
     def __init__(self, in_features, out_features, bias=True,dtype=torch.float32):
         super(LinearLayer, self).__init__()
         self.linear = nn.Linear(in_features, out_features, bias=bias).to(dtype)
+        self.dtype = dtype
         self.cpp_name = "linear"
+    def cpp_call_pram(self):
+        return "<{dtype},{in_features},{out_features}>".format(dtype=self.dtype,in_features=self.linear.in_features,out_features=self.linear.out_features)
     def forward(self, x):
         return self.linear(x)
     def to_cpp(self,layer_num):
