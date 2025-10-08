@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+from cpp import activiton2cpp
 class addLayer(torch.nn.Module):
     def __init__(self):
         super(addLayer, self).__init__()
@@ -107,13 +108,15 @@ class minLayer(torch.nn.Module):
     def to_cpp(self):
         return f"min(x, {self.dim}, {str(self.keepdim).lower()})"
 class reluLayer(torch.nn.Module):
-    def __init__(self):
+    def __init__(self,dtype=torch.float32):
         super(reluLayer, self).__init__()
+        self.dtype=dtype
 
     def forward(self, x):
         return F.relu(x)
-    def to_cpp(self):
-        return "relu(x)"
+    def to_cpp(self,layer_num,inputRank=2):
+
+        return activiton2cpp("relu",inputRank,layer_num)
 class sigmoidLayer(torch.nn.Module):
     def __init__(self):
         super(sigmoidLayer, self).__init__()

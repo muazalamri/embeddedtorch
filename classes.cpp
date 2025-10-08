@@ -13,3 +13,9 @@ struct LinearLayer
         return linearLayer<T, 2, 2>(input, weight, bias);
     };
 };
+// chanel_in:int,chanel_out:int,kernal_size:list[int],strides:list[int],padding:list[int]
+template <typename T,int chanel_in,int chanel_out>
+struct conv2D
+{
+    
+};

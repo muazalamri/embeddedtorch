@@ -54,7 +54,7 @@ class models_row(nn.Module):
 
     def forward(self, x):
         split_x = torch.split(x, self.split_points, dim=1)
-
+        outputs = [model(part) for model, part in zip(self.models, split_x)]
         return torch.cat(outputs, dim=1)
     def to_cpp(self):
         code=""
