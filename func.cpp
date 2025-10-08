@@ -98,30 +98,25 @@ Eigen::Tensor<T, Rank> softmax(const Eigen::Tensor<T, Rank> &input, int axis)
 
     return normalized;
 }
+// Linear layer: output = input * weights^T + bias
 template <typename T, int InputRank, int OutputRank>
-inline Eigen::Tensor<T, OutputRank> linearLayer(const Eigen::Tensor<T, InputRank> &input,
+Eigen::Tensor<T, OutputRank> linearLayer(const Eigen::Tensor<T, InputRank> &input,
                                          const Eigen::Tensor<T, 2> &weights,
                                          const Eigen::Tensor<T, 1> &bias)
 {
-    assert(input.dimensions()[InputRank - 1] == weights.dimensions()[0] &&
-           "Input feature size must match weight matrix");
-
-    Eigen::array<Eigen::IndexPair<int>, 1> contractDims = {
-        Eigen::IndexPair<int>(InputRank - 1, 0)};
-    Eigen::Tensor<T, OutputRank> output = input.contract(weights, contractDims);
-
-    // Broadcast bias to match output dimensions
-    Eigen::array<int, OutputRank> bcast;
-    for (int i = 0; i < OutputRank - 1; ++i)
-        bcast[i] = output.dimension(i);
-    bcast[OutputRank - 1] = 1;
-    // Reshape bias to have compatible dimensions for broadcasting
-    Eigen::array<Eigen::Index, OutputRank> reshape_dims;
-    for (int i = 0; i < OutputRank - 1; ++i)
-        reshape_dims[i] = 1;
-    reshape_dims[OutputRank - 1] = bias.dimension(0);
-
-    return output + bias.reshape(reshape_dims).broadcast(bcast);
+    Eigen::array<int, OutputRank>
+        bcast;
+    bcast[0] = input.dimension(0);
+    bcast[1] = 1;
+    std::cout << "bias" << bias.dimensions() << std::endl;
+    array<Eigen::IndexPair<int>, 1> contract_dims = {Eigen::IndexPair<int>(1, 0)};
+    std::cout << "mlut : " << input.dimensions() << "*" << weights.dimensions() << std::endl;
+    Tensor<T, 2> output = contractTensors<T, 2, 2, 2>(input, weights, contract_dims);
+    std::cout << "1111111111111" << std::endl;
+    Eigen::array<Eigen::Index, 2> bias_dims = {1, bias.dimensions()[0]}; // bias.dimensions()[0])};
+    Eigen::Tensor<T, 2> Td_bias = reshapeTensor<T, 1, 2>(bias, bias_dims).broadcast(bcast);
+    std::cout << "dims : " << Td_bias.dimensions() << std::endl;
+    return addTensors<float, 2>(output, Td_bias); // 2d_bias
 }
 
 // Max pooling (2D)
