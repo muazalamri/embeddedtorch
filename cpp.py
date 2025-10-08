@@ -28,7 +28,7 @@ def cpp_code(layers:list)->str:
             init,sets,body_line=layer.to_cpp(i)
             init_layers+=init
             set_values+=sets
-            if i<layer_count-1:body+=f"    auto input_{i+1}= {body_line}\n"
+            if i<layer_count-1:body+=f"    auto input_{i}= {body_line}\n"
             else:body+=f"    auto output= {body_line}\n"
     return code.format(init_layers=init_layers,body=body,set_values=set_values)
 if __name__=="__main__":
