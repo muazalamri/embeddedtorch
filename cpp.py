@@ -11,6 +11,8 @@ Tensor<float,1> bias_{layer_num}({bias.shape[-1]});
 """,f"""
     weight_{layer_num}.setValues({tensor2cpp(weight,float)});
     bias_{layer_num}.setValues({tensor2cpp(bias,float)});""",f"linearLayer<float, 2, 2>(input{'_'+str(layer_num-1) if layer_num > 0 else ''}, weight_{layer_num}, bias_{layer_num});"
+def relu2cpp(layer:torch.nn.Module,inputRank:int,layer_num:int)->str:
+    return "", "", f"relu<float, {inputRank}>(input" + ('_'+str(layer_num-1) if layer_num > 0 else '') + ");"
 def write_dep():
     with open("classes.cpp","r",encoding="utf-8") as f:
         open("out/classes.cpp","w",encoding="utf-8").write(f.read())

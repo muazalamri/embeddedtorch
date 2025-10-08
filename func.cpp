@@ -108,14 +108,14 @@ Eigen::Tensor<T, OutputRank> linearLayer(const Eigen::Tensor<T, InputRank> &inpu
         bcast;
     bcast[0] = input.dimension(0);
     bcast[1] = 1;
-    std::cout << "bias" << bias.dimensions() << std::endl;
+    //std::cout << "bias" << bias.dimensions() << std::endl;
     array<Eigen::IndexPair<int>, 1> contract_dims = {Eigen::IndexPair<int>(1, 0)};
-    std::cout << "mlut : " << input.dimensions() << "*" << weights.dimensions() << std::endl;
+    //std::cout << "mlut : " << input.dimensions() << "*" << weights.dimensions() << std::endl;
     Tensor<T, 2> output = contractTensors<T, 2, 2, 2>(input, weights, contract_dims);
-    std::cout << "1111111111111" << std::endl;
+    //std::cout << "1111111111111" << std::endl;
     Eigen::array<Eigen::Index, 2> bias_dims = {1, bias.dimensions()[0]}; // bias.dimensions()[0])};
     Eigen::Tensor<T, 2> Td_bias = reshapeTensor<T, 1, 2>(bias, bias_dims).broadcast(bcast);
-    std::cout << "dims : " << Td_bias.dimensions() << std::endl;
+    //std::cout << "dims : " << Td_bias.dimensions() << std::endl;
     return addTensors<float, 2>(output, Td_bias); // 2d_bias
 }
 
@@ -399,57 +399,49 @@ Conv(const Eigen::Tensor<T, InputRank> &input,
 #define TEST_FUNC_MAIN
 int main()
 {
-    std::cout << "Eigen Tensor Operations Example" << std::endl;
+    //std::cout << "Eigen Tensor Operations Example" << std::endl;
     Tensor<float, 2> A(2, 3);
     A.setRandom();
     Tensor<float, 2> B(2, 3);
     B.setRandom();
     Tensor<float, 2> C = addTensors(A, B);
-    std::cout << "A + B = \n"
+    //std::cout << "A + B = \n"
               << C << std::endl;
     // reshape example
     Eigen::array<Eigen::Index, 2> newDims = {3, 2};
     Tensor<float, 2> reshapedA = reshapeTensor<float, 2, 2>(A, newDims);
-    std::cout << "Reshaped A = \n"
-              << reshapedA << std::endl;
+    //std::cout << "Reshaped A = \n"<< reshapedA << std::endl;
     // scale example
     float scalar = 2.0f;
     Tensor<float, 2> scaledA = scaleTensor<float, 2>(A, scalar);
-    std::cout << "Scaled A = \n"
+    //std::cout << "Scaled A = \n"
               << scaledA << std::endl;
     // slice example
     Eigen::array<Eigen::Index, 2> offsets = {0, 1};
     Eigen::array<Eigen::Index, 2> extents = {2, 2};
     Tensor<float, 2> slicedA = sliceTensor<float, 2>(A, offsets, extents);
-    std::cout << "Sliced A = \n"
-              << slicedA << std::endl;
+    //std::cout << "Sliced A = \n" << slicedA << std::endl;
     // activation examples
     Tensor<float, 2> reluA = relu<float, 2>(A);
-    std::cout << "ReLU(A) = \n"
-              << reluA << std::endl;
+    //std::cout << "ReLU(A) = \n" << reluA << std::endl;
     Tensor<float, 2> sigmoidA = sigmoid<float, 2>(A);
-    std::cout << "Sigmoid(A) = \n"
-              << sigmoidA << std::endl;
+    //std::cout << "Sigmoid(A) = \n"<< sigmoidA << std::endl;
     Tensor<float, 2> tanhA = tanh<float, 2>(A);
-    std::cout << "Tanh(A) = \n"
-              << tanhA << std::endl;
+    //std::cout << "Tanh(A) = \n" << tanhA << std::endl;
     Tensor<float, 2> softmaxA = softmax<float, 2>(A, 1);
-    std::cout << "Softmax(A) = \n"
-              << softmaxA << std::endl;
+    //std::cout << "Softmax(A) = \n" << softmaxA << std::endl;
     // linear layer example
     Tensor<float, 2> weights(3, 4);
     weights.setRandom();
     Tensor<float, 1> bias(4);
     bias.setRandom();
     Tensor<float, 2> linearOut = linearLayer<float, 2, 2>(A, weights, bias);
-    std::cout << "Linear Layer Output = \n"
-              << linearOut << std::endl;
+    //std::cout << "Linear Layer Output = \n" << linearOut << std::endl;
     // contractTensors example
     Tensor<float, 2> D(3, 4);
     D.setRandom();
     Tensor<float, 2> E = contractTensors<float, 2, 2, 2>(A, D, {IndexPair<int>(1, 0)});
-    std::cout << "A * D = \n"
-              << E << std::endl;
+    //std::cout << "A * D = \n" << E << std::endl;
     return 0;
 }
 #endif
