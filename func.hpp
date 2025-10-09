@@ -16,7 +16,10 @@ template <typename T, int Rank>
 inline Eigen::Tensor<T, Rank> addTensors(const Eigen::Tensor<T, Rank> &A,
                                   const Eigen::Tensor<T, Rank> &B)
 {
+    #ifdef DEBUG
+    std::cout<<"addTensors input rank:"<<Rank<<std::endl;
     assert(A.dimensions() == B.dimensions() && "Tensors must have same shape");
+    #endif
     return A + B;
 }
 // tensor reshaping
@@ -70,10 +73,12 @@ inline Eigen::Tensor<T, Rank> tanh(const Eigen::Tensor<T, Rank> &A)
 template <typename T, int Rank>
 Eigen::Tensor<T, Rank> softmax(const Eigen::Tensor<T, Rank> &input, int axis)
 {
+    #ifdef DEBUG
+    std::cout<<"softmax input rank:"<<Rank<<std::endl;
     static_assert(Rank >= 1, "softmax: Rank must be >= 1");
     if (axis < 0 || axis >= Rank)
         throw std::invalid_argument("softmax: axis out of range");
-
+    #endif
     Eigen::array<int, 1> reduce_axis = {axis};
 
     // |x|
@@ -123,42 +128,67 @@ Eigen::Tensor<T, OutputRank> linearLayer(const Eigen::Tensor<T, InputRank> &inpu
 }
 
 // Max pooling (2D)
-template <typename T, int InputRank, int OutputRank>
-Eigen::Tensor<T, OutputRank> maxPool2D(const Eigen::Tensor<T, InputRank> &input,
-                                       const Eigen::array<int, 2> &poolSize,
-                                       const Eigen::array<int, 2> &strides)
+template <typename T, int Rank>
+Eigen::Tensor<T, Rank> maxPool2D(const Eigen::Tensor<T, Rank> &input,
+                                 const Eigen::array<int, 2> &poolSize,
+                                 const Eigen::array<int, 2> &strides)
 {
-    Eigen::array<int, InputRank> kernel;
-    Eigen::array<int, InputRank> stride;
-    for (int i = 0; i < InputRank - 2; ++i)
+    Eigen::array<int, Rank> kernel;
+    Eigen::array<int, Rank> stride;
+    for (int i = 0; i < Rank - 2; ++i)
     {
         kernel[i] = 1;
         stride[i] = 1;
     }
-    kernel[InputRank - 2] = poolSize[0];
-    kernel[InputRank - 1] = poolSize[1];
-    stride[InputRank - 2] = strides[0];
-    stride[InputRank - 1] = strides[1];
+    kernel[Rank - 2] = poolSize[0];
+    kernel[Rank - 1] = poolSize[1];
+    stride[Rank - 2] = strides[0];
+    stride[Rank - 1] = strides[1];
     return input.extract_image_patches(poolSize[0], poolSize[1], strides[0], strides[1], 1, 1, 0).maximum(kernel).stride(stride);
 }
 // Average pooling (2D)
-template <typename T, int InputRank, int OutputRank>
-Eigen::Tensor<T, OutputRank> avgPool2D(const Eigen::Tensor<T, InputRank> &input,
+template <typename T, int Rank>
+Eigen::Tensor<T, Rank> avgPool2D(const Eigen::Tensor<T, Rank> &input,
                                        const Eigen::array<int, 2> &poolSize,
                                        const Eigen::array<int, 2> &strides)
 {
-    Eigen::array<int, InputRank> kernel;
-    Eigen::array<int, InputRank> stride;
-    for (int i = 0; i < InputRank - 2; ++i)
+    Eigen::array<int, Rank> kernel;
+    Eigen::array<int, Rank> stride;
+    for (int i = 0; i < Rank - 2; ++i)
     {
         kernel[i] = 1;
         stride[i] = 1;
     }
-    kernel[InputRank - 2] = poolSize[0];
-    kernel[InputRank - 1] = poolSize[1];
-    stride[InputRank - 2] = strides[0];
-    stride[InputRank - 1] = strides[1];
+    kernel[Rank - 2] = poolSize[0];
+    kernel[Rank - 1] = poolSize[1];
+    stride[Rank - 2] = strides[0];
+    stride[Rank - 1] = strides[1];
     return input.extract_image_patches(poolSize[0], poolSize[1], strides[0], strides[1], 1, 1, 0).mean(kernel).stride(stride);
+}
+template <typename T, int InputRank, int OutputRank>
+Eigen::Tensor<T, OutputRank> flatten(const Eigen::Tensor<T, InputRank> &input,int start_dim=1, end_dim=-1)
+{
+    // Adjust negative end_dim
+    if (end_dim < 0)
+        end_dim += InputRank;
+    #ifdef DEBUG
+    std::cout<<"flatten input rank:"<<InputRank<<std::endl;
+    static_assert(InputRank >= 2, "flatten: InputRank must be >= 2");
+    if (start_dim < 0 || start_dim >= InputRank || end_dim < 0 || end_dim >= InputRank || start_dim > end_dim)
+        throw std::invalid_argument("flatten: start_dim or end_dim out of range");
+    #endif
+    // Compute new dimensions
+    Eigen::array<Eigen::Index, OutputRank> newDims;
+    int out_idx = 0;
+    for (int i = 0; i < start_dim; ++i)
+        newDims[out_idx++] = input.dimension(i);
+    Eigen::Index flattened_size = 1;
+    for (int i = start_dim; i <= end_dim; ++i)
+        flattened_size *= input.dimension(i);
+    newDims[out_idx++] = flattened_size;
+    for (int i = end_dim + 1; i < InputRank; ++i)
+        newDims[out_idx++] = input.dimension(i);
+    return reshapeTensor<T, InputRank, OutputRank>(input, newDims);
 }
 // Batch normalization
 template <typename T, int Rank>
@@ -178,15 +208,6 @@ Eigen::Tensor<T, Rank> batchNorm(const Eigen::Tensor<T, Rank> &input,
     return gamma.reshape(Eigen::array<Eigen::Index, Rank>{1}).broadcast(bcast) * normalized +
            beta.reshape(Eigen::array<Eigen::Index, Rank>{1}).broadcast(bcast);
 }
-// Dropout
-template <typename T, int Rank>
-Eigen::Tensor<T, Rank> dropout(const Eigen::Tensor<T, Rank> &input, T dropProb)
-{
-    assert(dropProb >= 0 && dropProb < 1 && "dropProb must be in [0, 1)");
-    Eigen::Tensor<T, Rank> mask = (Eigen::Tensor<T, Rank>::Random(input.dimensions()) + static_cast<T>(1)) / static_cast<T>(2);
-    mask = (mask > dropProb).template cast<T>();
-    return input * mask / (static_cast<T>(1) - dropProb);
-}
 // Padding
 template <typename T, int InputRank, int OutputRank>
 Eigen::Tensor<T, OutputRank> padTensor(const Eigen::Tensor<T, InputRank> &input,
@@ -204,10 +225,12 @@ Conv(const Eigen::Tensor<T, InputRank> &input,
 {
     // Derive spatial rank from kernel rank:
     constexpr int SpatialRank = KernelRank - 2;
+    #ifdef DEBUG
+    std::cout<<"Conv input rank:"<<InputRank<<", kernel rank:"<<KernelRank<<", output rank:"<<OutputRank<<", spatial rank:"<<SpatialRank<<std::endl;
     static_assert(InputRank == SpatialRank + 1, "InputRank must be SpatialRank+1 (channels + spatial dims).");
     static_assert(OutputRank == SpatialRank + 1, "OutputRank must be SpatialRank+1 (filters + spatial dims).");
     static_assert(StrideRank == SpatialRank, "StrideRank must equal the number of spatial dimensions (SpatialRank).");
-
+    #endif
     // Helper index-unpack utilities for calling tensor(...)
     auto tensor_get = []<int Rank>(const Eigen::Tensor<T, Rank> &t, const std::array<int, Rank> &idx) -> T
     {
@@ -232,7 +255,10 @@ Conv(const Eigen::Tensor<T, InputRank> &input,
     const int C_in = static_cast<int>(input.dimension(0));
     const int C_out = static_cast<int>(kernel.dimension(0));
     const int kernel_C_in = static_cast<int>(kernel.dimension(1));
+    #ifdef DEBUG
+    std::cout<<"Conv C_in:"<<C_in<<", C_out:"<<C_out<<", kernel_C_in:"<<kernel_C_in<<std::endl;
     assert(kernel_C_in == C_in && "kernel second dimension must match input channels");
+    #endif
 
     // Gather spatial dims
     std::array<int, SpatialRank> in_spatial_dims{};
@@ -261,8 +287,10 @@ Conv(const Eigen::Tensor<T, InputRank> &input,
     for (int s = 0; s < SpatialRank; ++s)
     {
         int numerator = in_spatial_dims[s] + pad_before[s] + pad_after[s] - kernel_spatial_dims[s];
+        #ifdef DEBUG
         if (numerator < 0)
             numerator = 0; // avoid negative
+        #endif
         out_spatial_dims[s] = numerator / strides[s] + 1;
     }
 

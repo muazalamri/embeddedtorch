@@ -41,10 +41,9 @@ strides_{layer_num}={{{stridesVal}}};
 padding_{layer_num}= {{std::make_pair(0, 0), std::make_pair({padding}, {padding}), std::make_pair({padding}, {padding}), std::make_pair({padding}, {padding})}};"""
     call=f'conv3DLayer<float>(input{'_'+str(layer_num) if layer_num>0 else ''}, ker_{layer_num}, strides_{layer_num}, padding_{layer_num});'
     return init,sets,call
-def flatten2cpp(start_dim:int,end_dim:int,layer_num:int)->str:
+def flatten2cpp(InputRank:int,OutputRank:int,start_dim:int,end_dim:int,layer_num:int)->str:
+    return "", "", f"flatten<float, {InputRank}, {OutputRank}> (input{'_'+str(layer_num) if layer_num > 0 else ''}, {start_dim}, {end_dim});"
 def write_dep():
-    with open("classes.cpp","r",encoding="utf-8") as f:
-        open("out/classes.cpp","w",encoding="utf-8").write(f.read())
     with open("func.cpp","r",encoding="utf-8") as f:
         open("out/func.cpp","w",encoding="utf-8").write(f.read())
 def cpp_code(layers:list)->str:

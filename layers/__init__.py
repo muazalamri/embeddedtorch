@@ -55,14 +55,18 @@ class models_row(nn.Module):
             code+=model.to_cpp()+"\n"
         return code
 class flattenLayer(torch.nn.Module):
-    def __init__(self,dim=1,dtype=torch.float32):
+    def __init__(self,start_dim,end_dim,inputRank,outputRank,dtype=torch.float32):
         super(flattenLayer, self).__init__()
-        self.dim = dim
+        self.inputRank=inputRank
+        self.outputRank=outputRank
+        self.startdim = start_dim
+        self.end_dim = end_dim
+        self.dtype=dtype
 
     def forward(self, x):
-        return torch.flatten(x, start_dim=self.dim)
-    def to_cpp(self):
-        return f"flatten(x, {self.dim}, {self.dim})"
+        return torch.flatten(x, start_dim=self.startdim, end_dim=self.end_dim)
+    def to_cpp(self,layer_num):
+        return "", "", f"flatten<float, {self.inputRank}, {self.outputRank}> (input{'_'+layer_num if layer_num>0 else ''}, {self.startdim}, {self.end_dim});"
 class reshapeLayer(torch.nn.Module):
     def __init__(self,shape,dtype=torch.float32):
         super(reshapeLayer, self).__init__()
