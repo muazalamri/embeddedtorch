@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
-from cpp import tensor2cpp,linear2cpp
+from cpp import tensor2cpp,linear2cpp,conv2D2cpp,conv1D2cpp,conv3D2cpp
 class EmbaeddableModel(nn.Module):
     def __init__(self, dtype):
         super().__init__()
@@ -10,13 +10,6 @@ class EmbaeddableModel(nn.Module):
         for layer in self.list:
             x = layer(x)
         return x
-    def to_cpp(self,arch):
-        code=""
-        prams=""
-        for layer in self.list:
-            code+=layer.to_cpp()+"\n"
-            prams+=layer.cpp_pram(arch)
-        return code,prams
     def add_layer(self,layer):
         self.list.append(layer)
 class LinearLayer(nn.Module):
@@ -190,7 +183,7 @@ class Conv2dLayer(nn.Module):
         def forward(self, x):
             return self.conv(x)
         def to_cpp(self):
-            return f"conv2d(x, weight, bias, {self.conv.stride}, {self.conv.padding}, {self.conv.dilation}, {self.conv.groups}), {self.dtype})"
+            return conv2D2cpp(self.conv.out_channels,self.conv.in_channels,tensor2cpp(self.conv.weight,float),tensor2cpp(torch.tensor(self.conv.stride),int),list(self.conv.kernel_size),list(self.conv.stride),self.conv.padding[0])
 class Conv1dLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True,dtype=torch.float32):
         super(Conv1dLayer, self).__init__()
@@ -200,7 +193,7 @@ class Conv1dLayer(nn.Module):
     def forward(self, x):
         return self.conv(x)
     def to_cpp(self):
-        return f"conv1d(x, weight, bias, {self.conv.stride}, {self.conv.padding}, {self.conv.dilation}, {self.conv.groups}), {self.dtype})"
+        return conv1D2cpp(self.conv.out_channels,self.conv.in_channels,tensor2cpp(self.conv.weight,float),tensor2cpp(torch.tensor(self.conv.stride),int),self.conv.kernel_size[0],self.conv.padding[0])
 class Conv3dLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True,dtype=torch.float32):
         super(Conv3dLayer, self).__init__()
@@ -210,7 +203,7 @@ class Conv3dLayer(nn.Module):
     def forward(self, x):
         return self.conv(x)
     def to_cpp(self):
-        return f"conv3d(x, weight, bias, {self.conv.stride}, {self.conv.padding}, {self.conv.dilation}, {self.conv.groups}), {self.dtype})"
+        return conv3D2cpp(self.conv.out_channels,self.conv.in_channels,tensor2cpp(self.conv.weight,float),tensor2cpp(torch.tensor(self.conv.stride),int),list(self.conv.kernel_size),list(self.conv.stride),self.conv.padding[0])
 class MaxPool2dLayer(nn.Module):
     def __init__(self, kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False,dtype=torch.float32):
         super(MaxPool2dLayer, self).__init__()

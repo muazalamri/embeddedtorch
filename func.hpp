@@ -1,5 +1,5 @@
-#ifndef EIGEN_USE_THREADS
-#define EIGEN_USE_THREADS
+#ifndef func_h
+#define func_h
 #include <iostream>
 #include <unsupported/Eigen/CXX11/Tensor>
 #include <limits>
@@ -7,7 +7,10 @@
 #include <vector>
 #include <cassert>
 using namespace Eigen;
-
+//using threads
+#ifndef EIGEN_USE_THREADS
+#define EIGEN_USE_THREADS
+#endif
 // tensor adding
 template <typename T, int Rank>
 inline Eigen::Tensor<T, Rank> addTensors(const Eigen::Tensor<T, Rank> &A,
@@ -192,7 +195,7 @@ Eigen::Tensor<T, OutputRank> padTensor(const Eigen::Tensor<T, InputRank> &input,
     return input.pad(padding);
 }
 
-template <typename T, int InputRank, int OutputRank, int KernelRank, int StrideRank, int FilterRank>
+template <typename T, int InputRank, int OutputRank, int KernelRank, int StrideRank>
 Eigen::Tensor<T, OutputRank>
 Conv(const Eigen::Tensor<T, InputRank> &input,
      const Eigen::Tensor<T, KernelRank> &kernel,
@@ -395,6 +398,35 @@ Conv(const Eigen::Tensor<T, InputRank> &input,
 
     return output;
 }
+
+//conv2D
+template <typename T>
+Tensor<T,4> conv2DLayer(const Tensor<T,4> &input,
+                        const Tensor<T,4> &kernel,
+                        const std::array<int,2> &strides,
+                        const std::array<std::pair<int,int>,4> &padding)
+{
+    return Conv<T,4,4,4,2>(input,kernel,strides,padding);
+}
+
+template <typename T>
+Tensor<T,3> conv1DLayer(const Tensor<T,3> &input,
+                        const Tensor<T,3> &kernel,
+                        const std::array<int,1> &strides,
+                        const std::array<std::pair<int,int>,3> &padding)
+{
+    return Conv<T,3,3,3,1>(input,kernel,strides,padding);
+}
+
+template <typename T>
+Tensor<T,5> conv3DLayer(const Tensor<T,5> &input,
+                        const Tensor<T,5> &kernel,
+                        const std::array<int,3> &strides,
+                        const std::array<std::pair<int,int>,5> &padding)
+{
+    return Conv<T,5,5,5,3>(input,kernel,strides,padding);
+}
+
 #ifdef TEST_FUNC
 #define TEST_FUNC_MAIN
 int main()

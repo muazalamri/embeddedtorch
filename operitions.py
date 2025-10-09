@@ -115,7 +115,6 @@ class reluLayer(torch.nn.Module):
     def forward(self, x):
         return F.relu(x)
     def to_cpp(self,layer_num,inputRank=2):
-
         return activiton2cpp("relu",inputRank,layer_num)
 class sigmoidLayer(torch.nn.Module):
     def __init__(self):
@@ -123,16 +122,16 @@ class sigmoidLayer(torch.nn.Module):
 
     def forward(self, x):
         return torch.sigmoid(x)
-    def to_cpp(self):
-        return "sigmoid(x)"
+    def to_cpp(self,layer_num,inputRank=2):
+        return activiton2cpp("sigmoid",inputRank,layer_num)
 class tanhLayer(torch.nn.Module):
     def __init__(self):
         super(tanhLayer, self).__init__()
 
     def forward(self, x):
         return torch.tanh(x)
-    def to_cpp(self):
-        return "tanh(x)"
+    def to_cpp(self,layer_num,inputRank=2):
+        return activiton2cpp("tanh",inputRank,layer_num)
 class softmaxLayer(torch.nn.Module):
     def __init__(self, dim=1):
         super(softmaxLayer, self).__init__()
@@ -140,8 +139,8 @@ class softmaxLayer(torch.nn.Module):
 
     def forward(self, x):
         return F.softmax(x, dim=self.dim)
-    def to_cpp(self):
-        return f"softmax(x, {self.dim})"
+    def to_cpp(self,layer_num,inputRank=2):
+        return activiton2cpp("softmax",inputRank,layer_num)
 class logLayer(torch.nn.Module):
     def __init__(self):
         super(logLayer, self).__init__()

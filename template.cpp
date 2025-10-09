@@ -1,5 +1,4 @@
-#include "func.cpp"
-#include "classes.cpp"
+#include "func.hpp"
 {init_layers}
 void set_values(){{
     {set_values}
