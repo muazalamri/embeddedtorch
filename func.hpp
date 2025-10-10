@@ -1,4 +1,7 @@
 #ifndef func_h
+#ifndef EIGEN_USE_THREADS
+#define EIGEN_USE_THREADS
+#endif
 #define func_h
 #include <iostream>
 #include <unsupported/Eigen/CXX11/Tensor>
@@ -8,9 +11,6 @@
 #include <cassert>
 using namespace Eigen;
 //using threads
-#ifndef EIGEN_USE_THREADS
-#define EIGEN_USE_THREADS
-#endif
 // tensor adding
 template <typename T, int Rank>
 inline Eigen::Tensor<T, Rank> addTensors(const Eigen::Tensor<T, Rank> &A,
@@ -127,46 +127,124 @@ Eigen::Tensor<T, OutputRank> linearLayer(const Eigen::Tensor<T, InputRank> &inpu
     return addTensors<float, 2>(output, Td_bias); // 2d_bias
 }
 
-// Max pooling (2D)
-template <typename T, int Rank>
-Eigen::Tensor<T, Rank> maxPool2D(const Eigen::Tensor<T, Rank> &input,
-                                 const Eigen::array<int, 2> &poolSize,
-                                 const Eigen::array<int, 2> &strides)
+Tensor<float, 4> maxPool2D(const Tensor<float, 4> &input,
+                           int kernelH, int kernelW,
+                           int strideH, int strideW,
+                           bool same_padding = false)
 {
-    Eigen::array<int, Rank> kernel;
-    Eigen::array<int, Rank> stride;
-    for (int i = 0; i < Rank - 2; ++i)
+    const int batch = input.dimension(0);
+    const int inH = input.dimension(1);
+    const int inW = input.dimension(2);
+    const int channels = input.dimension(3);
+
+    int outH, outW;
+    int padTop = 0, padLeft = 0;
+
+    if (same_padding)
     {
-        kernel[i] = 1;
-        stride[i] = 1;
+        outH = static_cast<int>(std::ceil(float(inH) / strideH));
+        outW = static_cast<int>(std::ceil(float(inW) / strideW));
+
+        int padH = std::max(0, (outH - 1) * strideH + kernelH - inH);
+        int padW = std::max(0, (outW - 1) * strideW + kernelW - inW);
+
+        padTop = padH / 2;
+        padLeft = padW / 2;
     }
-    kernel[Rank - 2] = poolSize[0];
-    kernel[Rank - 1] = poolSize[1];
-    stride[Rank - 2] = strides[0];
-    stride[Rank - 1] = strides[1];
-    return input.extract_image_patches(poolSize[0], poolSize[1], strides[0], strides[1], 1, 1, 0).maximum(kernel).stride(stride);
+    else
+    {
+        outH = (inH - kernelH) / strideH + 1;
+        outW = (inW - kernelW) / strideW + 1;
+    }
+
+    Tensor<float, 4> output(batch, outH, outW, channels);
+    output.setZero();
+
+    for (int b = 0; b < batch; ++b)
+    {
+        for (int c = 0; c < channels; ++c)
+        {
+            for (int oy = 0; oy < outH; ++oy)
+            {
+                for (int ox = 0; ox < outW; ++ox)
+                {
+                    float maxVal = -std::numeric_limits<float>::infinity();
+
+                    for (int ky = 0; ky < kernelH; ++ky)
+                    {
+                        for (int kx = 0; kx < kernelW; ++kx)
+                        {
+                            int iy = oy * strideH + ky - padTop;
+                            int ix = ox * strideW + kx - padLeft;
+
+                            if (iy >= 0 && iy < inH && ix >= 0 && ix < inW)
+                            {
+                                float val = input(b, iy, ix, c);
+                                if (val > maxVal)
+                                    maxVal = val;
+                            }
+                        }
+                    }
+                    output(b, oy, ox, c) = maxVal;
+                }
+            }
+        }
+    }
+
+    return output;
 }
-// Average pooling (2D)
-template <typename T, int Rank>
-Eigen::Tensor<T, Rank> avgPool2D(const Eigen::Tensor<T, Rank> &input,
-                                       const Eigen::array<int, 2> &poolSize,
-                                       const Eigen::array<int, 2> &strides)
+// conv1D
+template <typename T>
+Tensor<float, 3> conv1D(const Tensor<float, 3> &input,
+                        const Tensor<float, 3> &kernel,
+                        int stride = 1,
+                        bool same_padding = false)
 {
-    Eigen::array<int, Rank> kernel;
-    Eigen::array<int, Rank> stride;
-    for (int i = 0; i < Rank - 2; ++i)
+    const int batch = input.dimension(0);
+    const int inW = input.dimension(1);      // Input width
+    const int inC = input.dimension(2);      // Input channels
+    const int kernelW = kernel.dimension(0); // Kernel width
+    const int outC = kernel.dimension(2);    // Output channels
+    int outW;
+    int padLeft = 0;
+    if (same_padding)
     {
-        kernel[i] = 1;
-        stride[i] = 1;
+        outW = static_cast<int>(std::ceil(float(inW) / stride));
+        int padW = std::max(0, (outW - 1) * stride + kernelW - inW);
+        padLeft = padW / 2;
     }
-    kernel[Rank - 2] = poolSize[0];
-    kernel[Rank - 1] = poolSize[1];
-    stride[Rank - 2] = strides[0];
-    stride[Rank - 1] = strides[1];
-    return input.extract_image_patches(poolSize[0], poolSize[1], strides[0], strides[1], 1, 1, 0).mean(kernel).stride(stride);
+    else
+    {
+        outW = (inW - kernelW) / stride + 1;
+    }
+    Tensor<float, 3> output(batch, outW, outC);
+    output.setZero();
+    for (int b = 0; b < batch; ++b)
+    {
+        for (int oc = 0; oc < outC; ++oc)
+        {
+            for (int ow = 0; ow < outW; ++ow)
+            {
+                float sum = 0.0f;
+                for (int kw = 0; kw < kernelW; ++kw)
+                {
+                    int iw = ow * stride + kw - padLeft;
+                    if (iw >= 0 && iw < inW)
+                    {
+                        for (int ic = 0; ic < inC; ++ic)
+                        {
+                            sum += input(b, iw, ic) * kernel(kw, ic, oc);
+                        }
+                    }
+                }
+                output(b, ow, oc) = sum;
+            }
+        }
+    }
+    return output;
 }
 template <typename T, int InputRank, int OutputRank>
-Eigen::Tensor<T, OutputRank> flatten(const Eigen::Tensor<T, InputRank> &input,int start_dim=1, end_dim=-1)
+Eigen::Tensor<T, OutputRank> flatten(const Eigen::Tensor<T, InputRank> &input,int start_dim=1,int end_dim=-1)
 {
     // Adjust negative end_dim
     if (end_dim < 0)
@@ -456,7 +534,7 @@ Tensor<T,5> conv3DLayer(const Tensor<T,5> &input,
 }
 
 #ifdef TEST_FUNC
-#define TEST_FUNC_MAIN
+#define TEST_FUNC
 int main()
 {
     //std::cout << "Eigen Tensor Operations Example" << std::endl;
@@ -501,7 +579,10 @@ int main()
     Tensor<float, 2> D(3, 4);
     D.setRandom();
     Tensor<float, 2> E = contractTensors<float, 2, 2, 2>(A, D, {IndexPair<int>(1, 0)});
-    //std::cout << "A * D = \n" << E << std::endl;
+    // std::cout << "A * D = \n" << E << std::endl;
+    // pooling
+    Tensor<float, 2> img(10,3,128,128);
+    maxPool2D<float,4>(iimg,{2,2},{2,2});
     return 0;
 }
 #endif

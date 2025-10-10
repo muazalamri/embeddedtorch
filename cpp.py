@@ -22,7 +22,7 @@ Eigen::array<std::pair<int, int>, 3> padding_{layer_num};"""
     padding_{layer_num}= {{std::make_pair(0, 0), std::make_pair({padding}, {padding}), std::make_pair({padding}, {padding})}};"""
     call=f'conv2DLayer<float>(input{'_'+str(layer_num) if layer_num>0 else ''}, ker_{layer_num}, strides_{layer_num}, padding_{layer_num});'
     return init,sets,call
-def cov1D2cpp(layer_num:int,kerVal:str,stridesVal:str,chanel_in:int,chanel_out:int,kernal_size:list[int],padding:int):
+def conv1D2cpp(layer_num:int,kerVal:str,stridesVal:str,chanel_in:int,chanel_out:int,kernal_size:list[int],padding:int):
     sets=f"""Tensor<float, 3>({chanel_out}, {chanel_in}, {kernal_size}) ker_{layer_num};
 Eigen::array<int, 1> strides_{layer_num};
 Eigen::array<std::pair<int, int>, 2> padding_{layer_num};
@@ -44,8 +44,8 @@ padding_{layer_num}= {{std::make_pair(0, 0), std::make_pair({padding}, {padding}
 def flatten2cpp(InputRank:int,OutputRank:int,start_dim:int,end_dim:int,layer_num:int)->str:
     return "", "", f"flatten<float, {InputRank}, {OutputRank}> (input{'_'+str(layer_num) if layer_num > 0 else ''}, {start_dim}, {end_dim});"
 def write_dep():
-    with open("func.cpp","r",encoding="utf-8") as f:
-        open("out/func.cpp","w",encoding="utf-8").write(f.read())
+    with open("func.hpp","r",encoding="utf-8") as f:
+        open("out/func.hpp","w",encoding="utf-8").write(f.read())
 def cpp_code(layers:list)->str:
     init_layers=""
     set_values=""
