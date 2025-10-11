@@ -1,6 +1,6 @@
 import torch
 def tensor2cpp(tensor,dtype)->str:
-    tensor=list(tensor.cpu().numpy().tolist())
+    tensor=list(tensor.detach().numpy().tolist())
     return str(tensor).replace('[','{').replace(']','}')
 
 def linear2cpp(layer:torch.nn.Module,layer_num:int)->str:
@@ -20,7 +20,7 @@ Eigen::array<std::pair<int, int>, 3> padding_{layer_num};"""
     sets=f"""   ker_{layer_num}.setValues({kerVal});
     strides_{layer_num}={{{stridesVal}}};
     padding_{layer_num}= {{std::make_pair(0, 0), std::make_pair({padding}, {padding}), std::make_pair({padding}, {padding})}};"""
-    call=f'conv2DLayer<float>(input{'_'+str(layer_num) if layer_num>0 else ''}, ker_{layer_num}, strides_{layer_num}, padding_{layer_num});'
+    call=f'Conv<float, 4, 4, 5, 3, 4>(input, ker, strides, padding);'
     return init,sets,call
 def conv1D2cpp(layer_num:int,kerVal:str,stridesVal:str,chanel_in:int,chanel_out:int,kernal_size:list[int],padding:int):
     sets=f"""Tensor<float, 3>({chanel_out}, {chanel_in}, {kernal_size}) ker_{layer_num};
