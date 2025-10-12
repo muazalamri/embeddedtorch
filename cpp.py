@@ -22,14 +22,14 @@ Eigen::array<std::pair<int, int>, 4> padding_{layer_num};\n"""
     padding_{layer_num}= {{std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair({padding[0]}, {padding[1]}), std::make_pair({padding[0]}, {padding[1]})}};"""
     call=f'Conv<float, 4, 4, 5, 3, 4>(input{'_'+str(layer_num-1) if layer_num > 0 else ''}.shuffle(F_L).eval(), ker_{layer_num}, strides_{layer_num}, padding_{layer_num}).shuffle(F_L).eval();'
     return init,sets,call
-def conv1D2cpp(layer_num:int,kerVal:str,stridesVal:str,chanel_in:int,chanel_out:int,kernal_size:list[int],padding:int):
+def conv1D2cpp(layer_num:int,kerVal:str,chanel_in:int,chanel_out:int,kernal_size:list[int],padding_left:int,padding_right:int,stridesVal:str):
     sets=f"""Tensor<float, 3>({chanel_out}, {chanel_in}, {kernal_size}) ker_{layer_num};
-Eigen::array<int, 1> strides_{layer_num};
-Eigen::array<std::pair<int, int>, 2> padding_{layer_num};
+Eigen::array<int, 2> strides_{layer_num};
+Eigen::array<std::pair<int, int>, 3> padding_{layer_num};
 """
     init=f"""ker_{layer_num}.setValues({kerVal});
 strides_{layer_num}={{{stridesVal}}};
-padding_{layer_num}={{std::make_pair(0, 0), std::make_pair({padding}, {padding})}}"""
+padding_{layer_num}={{std::make_pair(0, 0), std::make_pair({padding_left}, {padding_right}), std::make_pair({padding_left}, {padding_right})}}"""
     call=f"""conv1DLayer<float>(input{'_'+str(layer_num) if layer_num>0 else ''}, ker_{layer_num}, strides_{layer_num}, padding_{layer_num});"""
     return sets,init,call
 def conv3D2cpp(layer_num:int,kerVal:str,stridesVal:str,chanel_in:int,chanel_out:int,kernal_size:list[int],strides:list[int],padding:list[int]):

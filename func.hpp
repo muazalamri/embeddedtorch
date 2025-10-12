@@ -229,6 +229,8 @@ template <typename T>
 Eigen::Tensor<T, 3> maxPool1D(const Eigen::Tensor<T, 3> &input,
                                  int kernel_size,
                                  int stride,
+                                 int padding_left,
+                                 int padding_right,
                                  bool same_padding = false)
 {
     #ifdef DEBUG
@@ -237,26 +239,22 @@ Eigen::Tensor<T, 3> maxPool1D(const Eigen::Tensor<T, 3> &input,
     const int batch = input.dimension(0);
     const int inW = input.dimension(1);
     const int channels = input.dimension(2);
-
     int outW;
-    int padLeft = 0;
-
+    int padLeft = padding_left;
+    int padRight = padding_right;
     if (same_padding)
     {
         outW = static_cast<int>(std::ceil(float(inW) / stride));
-
         int padW = std::max(0, (outW - 1) * stride + kernel_size - inW);
-
         padLeft = padW / 2;
+        padRight = padW - padLeft; // ensure total padding
     }
     else
     {
-        outW = (inW - kernel_size) / stride + 1;
+        outW = (inW + padLeft + padRight - kernel_size) / stride + 1;
     }
-
     Eigen::Tensor<T, 3> output(batch, outW, channels);
     output.setZero();
-
     for (int b = 0; b < batch; ++b)
     {
         for (int c = 0; c < channels; ++c)
@@ -264,11 +262,9 @@ Eigen::Tensor<T, 3> maxPool1D(const Eigen::Tensor<T, 3> &input,
             for (int ox = 0; ox < outW; ++ox)
             {
                 T maxVal = -std::numeric_limits<T>::infinity();
-
                 for (int kx = 0; kx < kernel_size; ++kx)
                 {
                     int ix = ox * stride + kx - padLeft;
-
                     if (ix >= 0 && ix < inW)
                     {
                         T val = input(b, ix, c);
@@ -280,7 +276,6 @@ Eigen::Tensor<T, 3> maxPool1D(const Eigen::Tensor<T, 3> &input,
             }
         }
     }
-
     return output;
 }
 

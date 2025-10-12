@@ -230,7 +230,7 @@ class MaxPool1dLayer(nn.Module):
     def forward(self, x):
         return self.pool(x)
     def to_cpp(self):
-        return f"max_pool1d(x, {self.pool.kernel_size}, {self.pool.stride}, {self.pool.padding}, {self.pool.dilation}, {self.pool.ceil_mode}), {self.dtype})"
+        return "", "", f"max_pool1d<float>(x, {self.pool.kernel_size[0]}, {self.pool.kernel_size[1]}, {self.pool.stride[0]}, {self.pool.stride[1]}, {self.pool.padding[0]}, {self.pool.padding[1]})"
 class MaxPool3dLayer(nn.Module):
     def __init__(self, kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False,dtype=torch.float32):
         super(MaxPool3dLayer, self).__init__()
