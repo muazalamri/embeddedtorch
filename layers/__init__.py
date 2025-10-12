@@ -66,7 +66,7 @@ class flattenLayer(torch.nn.Module):
     def forward(self, x):
         return torch.flatten(x, start_dim=self.startdim, end_dim=self.end_dim)
     def to_cpp(self,layer_num):
-        return "", "", f"flatten<float, {self.inputRank}, {self.outputRank}> (input{'_'+str(layer_num) if layer_num>0 else ''}, {self.startdim}, {self.end_dim});"
+        return "", "", f"flatten<float, {self.inputRank}, {self.outputRank}> (input{'_'+str(layer_num-1) if layer_num>0 else ''}, {self.startdim}, {self.end_dim});"
 class reshapeLayer(torch.nn.Module):
     def __init__(self,shape,dtype=torch.float32):
         super(reshapeLayer, self).__init__()
@@ -187,7 +187,8 @@ class Conv2dLayer(nn.Module):
         def forward(self, x):
             return self.conv(x)
         def to_cpp(self,layer_num):
-            return conv2D2cpp(layer_num,tensor2cpp(self.conv.weight,float),self.conv.in_channels,self.conv.out_channels,tensor2cpp(torch.tensor(self.conv.stride),int),list(self.conv.kernel_size),list(self.conv.stride),self.conv.padding[0])
+            shape=self.conv.weight.shape
+            return conv2D2cpp(layer_num,tensor2cpp(self.conv.weight.reshape(shape[1],shape[0],1,shape[2],shape[3]),float),self.conv.in_channels,self.conv.out_channels,list(self.conv.kernel_size),list(self.conv.stride),self.conv.padding)
 class Conv1dLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True,dtype=torch.float32):
         super(Conv1dLayer, self).__init__()
@@ -209,15 +210,17 @@ class Conv3dLayer(nn.Module):
     def to_cpp(self):
         return conv3D2cpp(self.conv.out_channels,self.conv.in_channels,tensor2cpp(self.conv.weight,float),tensor2cpp(torch.tensor(self.conv.stride),int),list(self.conv.kernel_size),list(self.conv.stride),self.conv.padding[0])
 class MaxPool2dLayer(nn.Module):
-    def __init__(self, kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False,dtype=torch.float32):
+    def __init__(self, kernel_size=(2,2), stride=(2,2),dtype=torch.float32):
         super(MaxPool2dLayer, self).__init__()
-        self.pool = nn.MaxPool2d(kernel_size, stride=stride, padding=padding, dilation=dilation, return_indices=return_indices, ceil_mode=ceil_mode).to(dtype)
+        self.pool = nn.MaxPool2d(kernel_size, stride=stride).to(dtype)
         self.dtype = dtype
+        self.ker_size=kernel_size
+        self.stride=stride
 
     def forward(self, x):
         return self.pool(x)
-    def to_cpp(self):
-        return f"max_pool2d(x, {self.pool.kernel_size}, {self.pool.stride}, {self.pool.padding}, {self.pool.dilation}, {self.pool.ceil_mode}), {self.dtype})"
+    def to_cpp(self,layer_num):
+        return "","",f"maxPool2D<float>(input{'_'+str(layer_num-1) if layer_num>0 else ''}, {self.ker_size[0]}, {self.ker_size[1]}, {self.stride}, {self.stride})"
 class MaxPool1dLayer(nn.Module):
     def __init__(self, kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False,dtype=torch.float32):
         super(MaxPool1dLayer, self).__init__()

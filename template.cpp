@@ -1,4 +1,5 @@
 #include "func.hpp"
+Eigen::array<int, 4> F_L{{1, 0, 2, 3}};
 {init_layers}
 void set_values(){{
     {set_values}
