@@ -1,14 +1,13 @@
 #ifndef func_h
-#ifndef EIGEN_USE_THREADS
-#define EIGEN_USE_THREADS
-#endif
 #define func_h
+#ifdef DEBUG
 #include <iostream>
+#include <cassert>
+#endif
 #include <unsupported/Eigen/CXX11/Tensor>
 #include <limits>
 #include <array>
 #include <vector>
-#include <cassert>
 using namespace Eigen;
 // using threads
 //  tensor adding
@@ -16,10 +15,11 @@ template <typename T, int Rank>
 inline Eigen::Tensor<T, Rank> addTensors(const Eigen::Tensor<T, Rank> &A,
                                          const Eigen::Tensor<T, Rank> &B)
 {
-#ifdef DEBUG
+    #ifdef DEBUG
     std::cout << "addTensors input rank:" << Rank << std::endl;
+    std::cout << "addTensors input dims:" << A.dimensions() << "+" << B.dimensions() << Rank << std::endl;
     assert(A.dimensions() == B.dimensions() && "Tensors must have same shape");
-#endif
+    #endif
     return A + B;
 }
 // tensor reshaping
@@ -27,12 +27,18 @@ template <typename T, int Rank, int NewRank>
 inline Eigen::Tensor<T, NewRank> reshapeTensor(const Eigen::Tensor<T, Rank> &A,
                                                const Eigen::array<Eigen::Index, NewRank> &newDims)
 {
+    #ifdef DEBUG
+    std::cout << "old dims: " << A.dimensions() << ", new dims: " << newDims;
+    #endif
     return A.reshape(newDims);
 }
 // matrix * scalar
 template <typename T, int Rank>
 inline Eigen::Tensor<T, Rank> scaleTensor(const Eigen::Tensor<T, Rank> &A, T scalar)
 {
+    #ifdef DEBUG
+    std::cout << "scaleTensor input rank: " << Rank << " ,input dims:" << A.dimensions() << std::endl;
+    #endif
     return A * scalar;
 }
 // tensor slicing
@@ -41,6 +47,9 @@ inline Eigen::Tensor<T, Rank> sliceTensor(const Eigen::Tensor<T, Rank> &A,
                                           const Eigen::array<Eigen::Index, Rank> &offsets,
                                           const Eigen::array<Eigen::Index, Rank> &extents)
 {
+    #ifdef DEBUG
+    std::cout << "sliceTensor input rank:" << Rank << ", input dims:" << A.dimensions() << std::endl;
+    #endif
     return A.slice(offsets, extents);
 }
 // tensor contraction (generalized matrix multiplication)
@@ -49,36 +58,48 @@ inline Eigen::Tensor<T, RankC> contractTensors(const Eigen::Tensor<T, RankA> &A,
                                                const Eigen::Tensor<T, RankB> &B,
                                                const Eigen::array<Eigen::IndexPair<int>, 1> &contractDims)
 {
+    #ifdef DEBUG
+    std::cout << "contractTensors input ranks: " << RankA << "," << RankB << " ,input dims:" << A.dimensions() << "*" << B.dimensions() << std::endl;
+    #endif
     return A.contract(B, contractDims);
 }
 // ReLU activation
 template <typename T, int Rank>
 inline Eigen::Tensor<T, Rank> relu(const Eigen::Tensor<T, Rank> &A)
 {
+    #ifdef DEBUG
+    std::cout << "relu input rank:" << Rank << " ,input dims:" << A.dimensions() << std::endl;
+    #endif
     return A.cwiseMax(static_cast<T>(0));
 }
 // Sigmoid activation
 template <typename T, int Rank>
 inline Eigen::Tensor<T, Rank> sigmoid(const Eigen::Tensor<T, Rank> &A)
 {
+    #ifdef DEBUG
+    std::cout << "sigmoid input rank:" << Rank << " ,input dims:" << A.dimensions() << std::endl;
+    #endif
     return static_cast<T>(1) / (static_cast<T>(1) + (-A).exp());
 }
 // Tanh activation
 template <typename T, int Rank>
 inline Eigen::Tensor<T, Rank> tanh(const Eigen::Tensor<T, Rank> &A)
 {
+    #ifdef DEBUG
+    std::cout << "tanh input rank:" << Rank << " ,input dims:" << A.dimensions() << std::endl;
+    #endif
     return A.tanh();
 }
 // Softmax activation along specified axis//using average as a prototype
 template <typename T, int Rank>
 Eigen::Tensor<T, Rank> softmax(const Eigen::Tensor<T, Rank> &input, int axis)
 {
-#ifdef DEBUG
+    #ifdef DEBUG
     std::cout << "softmax input rank:" << Rank << std::endl;
     static_assert(Rank >= 1, "softmax: Rank must be >= 1");
     if (axis < 0 || axis >= Rank)
         throw std::invalid_argument("softmax: axis out of range");
-#endif
+    #endif
     Eigen::array<int, 1> reduce_axis = {axis};
 
     // |x|
@@ -106,7 +127,7 @@ Eigen::Tensor<T, Rank> softmax(const Eigen::Tensor<T, Rank> &input, int axis)
 
     return normalized;
 }
-// Linear layer: output = input * weights^T + bias
+// Linear layer: output = input * weights + bias
 template <typename T, int InputRank, int OutputRank>
 Eigen::Tensor<T, OutputRank> linearLayer(const Eigen::Tensor<T, InputRank> &input,
                                          const Eigen::Tensor<T, 2> &weights,
@@ -116,22 +137,31 @@ Eigen::Tensor<T, OutputRank> linearLayer(const Eigen::Tensor<T, InputRank> &inpu
         bcast;
     bcast[0] = input.dimension(0);
     bcast[1] = 1;
-    // std::cout << "bias" << bias.dimensions() << std::endl;
+    #ifdef DEBUG
+    std::cout << "bias" << bias.dimensions() << std::endl;
+    #endif
     array<Eigen::IndexPair<int>, 1> contract_dims = {Eigen::IndexPair<int>(1, 0)};
-    // std::cout << "mlut : " << input.dimensions() << "*" << weights.dimensions() << std::endl;
+    #ifdef DEBUG
+    std::cout << "mlut : " << input.dimensions() << "*" << weights.dimensions() << std::endl;
+    #endif
     Tensor<T, 2> output = contractTensors<T, 2, 2, 2>(input, weights, contract_dims);
-    // std::cout << "1111111111111" << std::endl;
     Eigen::array<Eigen::Index, 2> bias_dims = {1, bias.dimensions()[0]}; // bias.dimensions()[0])};
     Eigen::Tensor<T, 2> Td_bias = reshapeTensor<T, 1, 2>(bias, bias_dims).broadcast(bcast);
-    // std::cout << "dims : " << Td_bias.dimensions() << std::endl;
+    #ifdef DEBUG
+    std::cout << "bias dims : " << Td_bias.dimensions() << std::endl;
+    #endif
     return addTensors<float, 2>(output, Td_bias); // 2d_bias
 }
 
+template <typename T>
 Tensor<float, 4> maxPool2D(const Tensor<float, 4> &input,
                            int kernelH, int kernelW,
                            int strideH, int strideW,
                            bool same_padding = false)
 {
+    #ifdef DEBUG
+    std::cout << "maxPool2D input dims:" << input.dimensions() << std::endl;
+    #endif
     const int batch = input.dimension(0);
     const int inH = input.dimension(1);
     const int inW = input.dimension(2);
@@ -193,68 +223,79 @@ Tensor<float, 4> maxPool2D(const Tensor<float, 4> &input,
 
     return output;
 }
-// conv1D
+
+// Max pooling 1D
 template <typename T>
-Tensor<float, 3> conv1D(const Tensor<float, 3> &input,
-                        const Tensor<float, 3> &kernel,
-                        int stride = 1,
-                        bool same_padding = false)
+Eigen::Tensor<T, 3> maxPool1D(const Eigen::Tensor<T, 3> &input,
+                                 int kernel_size,
+                                 int stride,
+                                 bool same_padding = false)
 {
+    #ifdef DEBUG
+    std::cout << "maxPool1D input dims:" << input.dimensions() << std::endl;
+    #endif
     const int batch = input.dimension(0);
-    const int inW = input.dimension(1);      // Input width
-    const int inC = input.dimension(2);      // Input channels
-    const int kernelW = kernel.dimension(0); // Kernel width
-    const int outC = kernel.dimension(2);    // Output channels
+    const int inW = input.dimension(1);
+    const int channels = input.dimension(2);
+
     int outW;
     int padLeft = 0;
+
     if (same_padding)
     {
         outW = static_cast<int>(std::ceil(float(inW) / stride));
-        int padW = std::max(0, (outW - 1) * stride + kernelW - inW);
+
+        int padW = std::max(0, (outW - 1) * stride + kernel_size - inW);
+
         padLeft = padW / 2;
     }
     else
     {
-        outW = (inW - kernelW) / stride + 1;
+        outW = (inW - kernel_size) / stride + 1;
     }
-    Tensor<float, 3> output(batch, outW, outC);
+
+    Eigen::Tensor<T, 3> output(batch, outW, channels);
     output.setZero();
+
     for (int b = 0; b < batch; ++b)
     {
-        for (int oc = 0; oc < outC; ++oc)
+        for (int c = 0; c < channels; ++c)
         {
-            for (int ow = 0; ow < outW; ++ow)
+            for (int ox = 0; ox < outW; ++ox)
             {
-                float sum = 0.0f;
-                for (int kw = 0; kw < kernelW; ++kw)
+                T maxVal = -std::numeric_limits<T>::infinity();
+
+                for (int kx = 0; kx < kernel_size; ++kx)
                 {
-                    int iw = ow * stride + kw - padLeft;
-                    if (iw >= 0 && iw < inW)
+                    int ix = ox * stride + kx - padLeft;
+
+                    if (ix >= 0 && ix < inW)
                     {
-                        for (int ic = 0; ic < inC; ++ic)
-                        {
-                            sum += input(b, iw, ic) * kernel(kw, ic, oc);
-                        }
+                        T val = input(b, ix, c);
+                        if (val > maxVal)
+                            maxVal = val;
                     }
                 }
-                output(b, ow, oc) = sum;
+                output(b, ox, c) = maxVal;
             }
         }
     }
+
     return output;
 }
+
 template <typename T, int InputRank, int OutputRank>
 Eigen::Tensor<T, OutputRank> flatten(const Eigen::Tensor<T, InputRank> &input, int start_dim = 1, int end_dim = -1)
 {
     // Adjust negative end_dim
     if (end_dim < 0)
         end_dim += InputRank;
-#ifdef DEBUG
+    #ifdef DEBUG
     std::cout << "flatten input rank:" << InputRank << std::endl;
     static_assert(InputRank >= 2, "flatten: InputRank must be >= 2");
     if (start_dim < 0 || start_dim >= InputRank || end_dim < 0 || end_dim >= InputRank || start_dim > end_dim)
         throw std::invalid_argument("flatten: start_dim or end_dim out of range");
-#endif
+    #endif
     // Compute new dimensions
     Eigen::array<Eigen::Index, OutputRank> newDims;
     int out_idx = 0;
@@ -302,9 +343,12 @@ Conv(const Eigen::Tensor<T, InputRank> &input,
 {
     // Derive spatial rank from kernel rank:
     constexpr int SpatialRank = KernelRank - 2;
+    #ifdef DEBUG
+    std::cout << "Conv input rank:" << InputRank << ", kernel rank:" << KernelRank << ", SpatialRank:" << SpatialRank << std::endl;
     static_assert(InputRank == SpatialRank + 1, "InputRank must be SpatialRank+1 (channels + spatial dims).");
     static_assert(OutputRank == SpatialRank + 1, "OutputRank must be SpatialRank+1 (filters + spatial dims).");
     static_assert(StrideRank == SpatialRank, "StrideRank must equal the number of spatial dimensions (SpatialRank).");
+    #endif
 
     // Helper index-unpack utilities for calling tensor(...)
     auto tensor_get = []<int Rank>(const Eigen::Tensor<T, Rank> &t, const std::array<int, Rank> &idx) -> T
@@ -330,7 +374,10 @@ Conv(const Eigen::Tensor<T, InputRank> &input,
     const int C_in = static_cast<int>(input.dimension(0));
     const int C_out = static_cast<int>(kernel.dimension(0));
     const int kernel_C_in = static_cast<int>(kernel.dimension(1));
+    #ifdef DEBUG
+    std::cout << "Conv C_in: " << C_in << ", C_out: " << C_out << ", kernel_C_in: " << kernel_C_in << std::endl;
     assert(kernel_C_in == C_in && "kernel second dimension must match input channels");
+    #endif
 
     // Gather spatial dims
     std::array<int, SpatialRank> in_spatial_dims{};
@@ -497,86 +544,4 @@ Conv(const Eigen::Tensor<T, InputRank> &input,
     return output;
 }
 
-// conv2D
-template <typename T>
-Tensor<T, 4> conv2DLayer(const Tensor<T, 4> &input,
-                         const Tensor<T, 5> &kernel,
-                         const std::array<int, 2> &strides,
-                         const std::array<std::pair<int, int>, 4> &padding)
-{
-
-    return Conv<T, 4, 4, 5, 3, 4>(input, kernel, strides, padding);
-}
-
-template <typename T>
-Tensor<T, 3> conv1DLayer(const Tensor<T, 3> &input,
-                         const Tensor<T, 3> &kernel,
-                         const std::array<int, 1> &strides,
-                         const std::array<std::pair<int, int>, 3> &padding)
-{
-    return Conv<T, 3, 3, 3, 1>(input, kernel, strides, padding);
-}
-
-template <typename T>
-Tensor<T, 5> conv3DLayer(const Tensor<T, 5> &input,
-                         const Tensor<T, 5> &kernel,
-                         const std::array<int, 3> &strides,
-                         const std::array<std::pair<int, int>, 5> &padding)
-{
-    return Conv<T, 5, 5, 5, 3>(input, kernel, strides, padding);
-}
-
-#ifdef TEST_FUNC
-#define TEST_FUNC
-int main()
-{
-    // std::cout << "Eigen Tensor Operations Example" << std::endl;
-    Tensor<float, 2> A(2, 3);
-    A.setRandom();
-    Tensor<float, 2> B(2, 3);
-    B.setRandom();
-    Tensor<float, 2> C = addTensors(A, B);
-    // std::cout << "A + B = \n"
-    << C << std::endl;
-    // reshape example
-    Eigen::array<Eigen::Index, 2> newDims = {3, 2};
-    Tensor<float, 2> reshapedA = reshapeTensor<float, 2, 2>(A, newDims);
-    // std::cout << "Reshaped A = \n"<< reshapedA << std::endl;
-    //  scale example
-    float scalar = 2.0f;
-    Tensor<float, 2> scaledA = scaleTensor<float, 2>(A, scalar);
-    // std::cout << "Scaled A = \n"
-    << scaledA << std::endl;
-    // slice example
-    Eigen::array<Eigen::Index, 2> offsets = {0, 1};
-    Eigen::array<Eigen::Index, 2> extents = {2, 2};
-    Tensor<float, 2> slicedA = sliceTensor<float, 2>(A, offsets, extents);
-    // std::cout << "Sliced A = \n" << slicedA << std::endl;
-    //  activation examples
-    Tensor<float, 2> reluA = relu<float, 2>(A);
-    // std::cout << "ReLU(A) = \n" << reluA << std::endl;
-    Tensor<float, 2> sigmoidA = sigmoid<float, 2>(A);
-    // std::cout << "Sigmoid(A) = \n"<< sigmoidA << std::endl;
-    Tensor<float, 2> tanhA = tanh<float, 2>(A);
-    // std::cout << "Tanh(A) = \n" << tanhA << std::endl;
-    Tensor<float, 2> softmaxA = softmax<float, 2>(A, 1);
-    // std::cout << "Softmax(A) = \n" << softmaxA << std::endl;
-    //  linear layer example
-    Tensor<float, 2> weights(3, 4);
-    weights.setRandom();
-    Tensor<float, 1> bias(4);
-    bias.setRandom();
-    Tensor<float, 2> linearOut = linearLayer<float, 2, 2>(A, weights, bias);
-    // std::cout << "Linear Layer Output = \n" << linearOut << std::endl;
-    //  contractTensors example
-    Tensor<float, 2> D(3, 4);
-    D.setRandom();
-    Tensor<float, 2> E = contractTensors<float, 2, 2, 2>(A, D, {IndexPair<int>(1, 0)});
-    // std::cout << "A * D = \n" << E << std::endl;
-    // pooling
-    Tensor<float, 2> img(10, 3, 128, 128);
-    maxPool2D<float, 4>(iimg, {2, 2}, {2, 2});
-    return 0;
-}
-#endif
 #endif
