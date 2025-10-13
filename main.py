@@ -1,4 +1,4 @@
-from layers import EmbaeddableModel,LinearLayer,flattenLayer,Conv2dLayer,MaxPool2dLayer
+from layers import EmbaeddableModel,LinearLayer,flattenLayer,Conv1dLayer,MaxPool1dLayer
 from cpp import cpp_code,write_dep
 import torch
 from operitions import reluLayer
@@ -6,8 +6,8 @@ from operitions import reluLayer
 
 if __name__=="__main__":
     model=EmbaeddableModel(torch.float32)
-    model.add_layer(Conv2dLayer(2,2,(2,2),1,(0,1)))
-    model.add_layer(MaxPool2dLayer((2,2)))
+    model.add_layer(Conv1dLayer(2,2,1,1,(0,1)))
+    model.add_layer(MaxPool1dLayer((2,2)))
     model.add_layer(flattenLayer(4))
     model.add_layer(LinearLayer(16,8,dtype=torch.float32))#2
     model.add_layer(reluLayer(dtype=torch.float32))

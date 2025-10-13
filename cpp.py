@@ -23,15 +23,25 @@ Eigen::array<std::pair<int, int>, 4> padding_{layer_num};\n"""
     call=f'Conv<float, 4, 4, 5, 3, 4>(input{'_'+str(layer_num-1) if layer_num > 0 else ''}.shuffle(F_L).eval(), ker_{layer_num}, strides_{layer_num}, padding_{layer_num}).shuffle(F_L).eval();'
     return init,sets,call
 def conv1D2cpp(layer_num:int,kerVal:str,chanel_in:int,chanel_out:int,kernal_size:list[int],padding_left:int,padding_right:int,stridesVal:str):
-    sets=f"""Tensor<float, 3>({chanel_out}, {chanel_in}, {kernal_size}) ker_{layer_num};
+    """
+    Eigen::array<int, 3> S_1D {1, 0, 2};
+    auto in1D = Tensor<float, 3>(10, 2, 8);
+    in1D.setRandom();
+    auto input1D = in1D.shuffle(S_1D).eval();
+    //std::cout << input1D.dimensions() << std::endl;
+    auto ker1D = Tensor<float, 4>(4, 2, 1, 3);
+    ker1D.setRandom();
+    Eigen::array<int, 2> strides1D = {1,1};
+    Eigen::array<std::pair<int, int>, 3> padding1D = {std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(1, 1)};
+    auto out1D = Conv<float, 3, 3, 4, 2, 3>(input1D, ker1D, strides1D, padding1D);"""
+    init=f"""Tensor<float, 4> ker_{layer_num}({chanel_out}, {chanel_in}, 1, {kernal_size[0]});
 Eigen::array<int, 2> strides_{layer_num};
-Eigen::array<std::pair<int, int>, 3> padding_{layer_num};
-"""
-    init=f"""ker_{layer_num}.setValues({kerVal});
-strides_{layer_num}={{{stridesVal}}};
-padding_{layer_num}={{std::make_pair(0, 0), std::make_pair({padding_left}, {padding_right}), std::make_pair({padding_left}, {padding_right})}}"""
-    call=f"""conv1DLayer<float>(input{'_'+str(layer_num) if layer_num>0 else ''}, ker_{layer_num}, strides_{layer_num}, padding_{layer_num});"""
-    return sets,init,call
+Eigen::array<std::pair<int, int>, 3> padding_{layer_num};\n"""
+    sets=f"""ker_{layer_num}.setValues({kerVal});
+    strides_{layer_num}={stridesVal};
+    padding_{layer_num}= {{std::make_pair(0, 0), std::make_pair({padding_left}, {padding_right} , std::make_pair(0, 0)}};"""
+    call=f'Conv<float, 3, 3, 4, 2, 3>(input{'_'+str(layer_num-1) if layer_num > 0 else ''}.shuffle(S_1D).eval(), ker_{layer_num}, strides_{layer_num}, padding_{layer_num}).shuffle(S_1D).eval();'
+    return init,sets,call
 def conv3D2cpp(layer_num:int,kerVal:str,stridesVal:str,chanel_in:int,chanel_out:int,kernal_size:list[int],strides:list[int],padding:list[int]):
     init=f"""Tensor<float, 5> ker_{layer_num}({chanel_out}, {chanel_in}, {kernal_size[0]}, {kernal_size[1]}, {kernal_size[2]});
 Eigen::array<int, 3> strides_{layer_num};
