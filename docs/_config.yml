@@ -1,7 +1,7 @@
 name: EmbeddedTorch Documentation
 title: EmbeddedTorch - PyTorch to C++ Converter
 description: A powerful library for converting PyTorch models to embedded C++ code
-url: https://yourusername.github.io
+url: https://muazalamri.github.io
 baseurl: "/embeddedtorch"
 
 # Jekyll configuration
