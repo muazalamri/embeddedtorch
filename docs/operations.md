@@ -17,7 +17,7 @@ Rectified Linear Unit - most common activation function.
 
 **Usage:**
 ```python
-from operitions import reluLayer
+from embeddedtorch.operitions import reluLayer
 
 layer = reluLayer(dtype=torch.float32)
 ```
@@ -33,7 +33,7 @@ Sigmoid activation - outputs values between 0 and 1.
 
 **Usage:**
 ```python
-from operitions import sigmoidLayer
+from embeddedtorch.operitions import sigmoidLayer
 
 layer = sigmoidLayer()
 ```
@@ -49,7 +49,7 @@ Hyperbolic tangent activation.
 
 **Usage:**
 ```python
-from operitions import tanhLayer
+from embeddedtorch.operitions import tanhLayer
 
 layer = tanhLayer()
 ```
@@ -65,7 +65,7 @@ Softmax activation - normalizes outputs to probability distribution.
 
 **Usage:**
 ```python
-from operitions import softmaxLayer
+from embeddedtorch.operitions import softmaxLayer
 
 layer = softmaxLayer(dim=1)
 ```
@@ -89,7 +89,7 @@ Operations that take two input tensors.
 Element-wise addition.
 
 ```python
-from operitions import addLayer
+from embeddedtorch.operitions import addLayer
 
 add_op = addLayer()
 # forward: x1 + x2
@@ -100,7 +100,7 @@ add_op = addLayer()
 Element-wise subtraction.
 
 ```python
-from operitions import subLayer
+from embeddedtorch.operitions import subLayer
 
 sub_op = subLayer()
 # forward: x1 - x2
@@ -111,7 +111,7 @@ sub_op = subLayer()
 Element-wise multiplication.
 
 ```python
-from operitions import mulLayer
+from embeddedtorch.operitions import mulLayer
 
 mul_op = mulLayer()
 # forward: x1 * x2
@@ -122,7 +122,7 @@ mul_op = mulLayer()
 Element-wise division.
 
 ```python
-from operitions import divLayer
+from embeddedtorch.operitions import divLayer
 
 div_op = divLayer()
 # forward: x1 / x2
@@ -133,7 +133,7 @@ div_op = divLayer()
 Element-wise power operation.
 
 ```python
-from operitions import powLayer
+from embeddedtorch.operitions import powLayer
 
 pow_op = powLayer()
 # forward: x1 ** x2
@@ -144,7 +144,7 @@ pow_op = powLayer()
 Matrix multiplication.
 
 ```python
-from operitions import matmulLayer
+from embeddedtorch.operitions import matmulLayer
 
 matmul_op = matmulLayer()
 # forward: torch.matmul(x1, x2)
@@ -157,7 +157,7 @@ matmul_op = matmulLayer()
 Concatenate tensors along a dimension.
 
 ```python
-from operitions import catLayer
+from embeddedtorch.operitions import catLayer
 
 layer = catLayer(dim=1)
 # forward: torch.cat((x1, x2), dim=dim)
@@ -171,7 +171,7 @@ layer = catLayer(dim=1)
 Stack tensors along a dimension.
 
 ```python
-from operitions import stackLayer
+from embeddedtorch.operitions import stackLayer
 
 layer = stackLayer(dim=1)
 # forward: torch.stack((x1, x2), dim=dim)
@@ -189,7 +189,7 @@ Operations that reduce tensor dimensions.
 Compute mean along specified dimension.
 
 ```python
-from operitions import meanLayer
+from embeddedtorch.operitions import meanLayer
 
 layer = meanLayer(dim=1, keepdim=False)
 # forward: torch.mean(x, dim=dim, keepdim=keepdim)
@@ -204,7 +204,7 @@ layer = meanLayer(dim=1, keepdim=False)
 Compute sum along specified dimension.
 
 ```python
-from operitions import sumLayer
+from embeddedtorch.operitions import sumLayer
 
 layer = sumLayer(dim=0, keepdim=True)
 # forward: torch.sum(x, dim=dim, keepdim=keepdim)
@@ -219,7 +219,7 @@ layer = sumLayer(dim=0, keepdim=True)
 Compute maximum along specified dimension.
 
 ```python
-from operitions import maxLayer
+from embeddedtorch.operitions import maxLayer
 
 layer = maxLayer(dim=1, keepdim=False)
 # forward: torch.max(x, dim=dim, keepdim=keepdim).values
@@ -230,7 +230,7 @@ layer = maxLayer(dim=1, keepdim=False)
 Compute minimum along specified dimension.
 
 ```python
-from operitions import minLayer
+from embeddedtorch.operitions import minLayer
 
 layer = minLayer(dim=1, keepdim=False)
 # forward: torch.min(x, dim=dim, keepdim=keepdim).values
@@ -243,7 +243,7 @@ layer = minLayer(dim=1, keepdim=False)
 Natural logarithm.
 
 ```python
-from operitions import logLayer
+from embeddedtorch.operitions import logLayer
 
 log_op = logLayer()
 # forward: torch.log(x)
@@ -254,7 +254,7 @@ log_op = logLayer()
 Exponential function.
 
 ```python
-from operitions import expLayer
+from embeddedtorch.operitions import expLayer
 
 exp_op = expLayer()
 # forward: torch.exp(x)
@@ -265,7 +265,7 @@ exp_op = expLayer()
 Square root.
 
 ```python
-from operitions import sqrtLayer
+from embeddedtorch.operitions import sqrtLayer
 
 sqrt_op = sqrtLayer()
 # forward: torch.sqrt(x)
@@ -276,7 +276,7 @@ sqrt_op = sqrtLayer()
 Absolute value.
 
 ```python
-from operitions import absLayer
+from embeddedtorch.operitions import absLayer
 
 abs_op = absLayer()
 # forward: torch.abs(x)
@@ -287,8 +287,8 @@ abs_op = absLayer()
 ### Creating a Custom Model with Operations
 
 ```python
-from layers import EmbaeddableModel, LinearLayer
-from operitions import reluLayer, addLayer
+from embeddedtorch.layers import EmbaeddableModel, LinearLayer
+from embeddedtorch.operitions import reluLayer, addLayer
 import torch
 
 # Create model
@@ -306,7 +306,7 @@ model.add_layer(LinearLayer(5, 2, dtype=torch.float32))
 ### Combining Operations
 
 ```python
-from operitions import meanLayer, sumLayer, softmaxLayer
+from embeddedtorch.operitions import meanLayer, sumLayer, softmaxLayer
 
 # Compute statistics
 mean_op = meanLayer(dim=1, keepdim=True)

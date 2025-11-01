@@ -1,8 +1,3 @@
----
-layout: default
-title: Home
----
-
 # EmbeddedTorch
 
 **Convert your PyTorch models to embedded C++ code**
@@ -21,7 +16,7 @@ EmbeddedTorch is a powerful Python library that allows you to convert PyTorch ne
 ## Quick Start
 
 ```python
-from layers import EmbaeddableModel, LinearLayer
+from embeddedtorch.layers import EmbaeddableModel, LinearLayer
 import torch
 
 # Create a model

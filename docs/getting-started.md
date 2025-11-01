@@ -33,9 +33,9 @@ Let's create a simple neural network and convert it to C++.
 ### Step 1: Import Required Modules
 
 ```python
-from layers import EmbaeddableModel, LinearLayer
-from operitions import reluLayer
-from cpp import cpp_code, write_dep
+from embeddedtorch.layers import EmbaeddableModel, LinearLayer
+from embeddedtorch.operitions import reluLayer
+from embeddedtorch.cpp import cpp_code, write_dep
 import torch
 ```
 
@@ -95,8 +95,8 @@ The generated C++ code includes:
 ### Using Convolutional and Pooling Layers
 
 ```python
-from layers import EmbaeddableModel, LinearLayer, Conv1dLayer, MaxPool1dLayer, flattenLayer
-from operitions import reluLayer
+from embeddedtorch.layers import EmbaeddableModel, LinearLayer, Conv1dLayer, MaxPool1dLayer, flattenLayer
+from embeddedtorch.operitions import reluLayer
 
 # Create a CNN model
 model = EmbaeddableModel(torch.float32)
