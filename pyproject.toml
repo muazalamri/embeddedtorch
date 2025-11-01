@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 # Project metadata
 [project]
 name = "embeddedtorch"   # Package name on PyPI
-version = "0.1.0"        # Increase each release
+version = "0.1.2"        # Increase each release
 description = "Tiny neural network runtime for microcontrollers inspired by PyTorch"
 readme = "README.md"     # Long description for PyPI
 license = {file = "LICENSE"}
