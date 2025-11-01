@@ -1,0 +1,33 @@
+# Build backend configuration
+[build-system]
+requires = [
+    "setuptools>=61.0",  # Modern setuptools version
+    "wheel"              # Required to build wheels
+]
+build-backend = "setuptools.build_meta"
+
+# Project metadata
+[project]
+name = "embeddedtorch"   # Package name on PyPI
+version = "0.1.0"        # Increase each release
+description = "Tiny neural network runtime for microcontrollers inspired by PyTorch"
+readme = "README.md"     # Long description for PyPI
+license = {file = "LICENSE"}
+authors = [
+  {name = "Muaz Alamri", email = "muazalamri2006@gmail.com"}  # Author info
+]
+
+requires-python = ">=3.8"  # Minimum Python version supported
+
+# Runtime dependencies
+dependencies = [
+  "numpy>=1.20",   # Matrix operations and lightweight compute
+  "torch>=2.0.0"   # PyTorch compatibility and model export tools
+]
+
+# Useful project links for PyPI
+[project.urls]
+Homepage = "https://github.com/muazalamri/embeddedtorch"
+Documentation = "https://github.com/muazalamri/embeddedtorch#readme"
+Source = "https://github.com/muazalamri/embeddedtorch"
+Issues = "https://github.com/muazalamri/embeddedtorch/issues"
