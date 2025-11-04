@@ -1,3 +1,9 @@
+---
+layout: default
+title: Home
+permalink: /
+---
+
 # EmbeddedTorch
 
 **Convert your PyTorch models to embedded C++ code**
