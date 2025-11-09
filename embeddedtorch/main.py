@@ -17,6 +17,6 @@ if __name__=="__main__":
     model.add_layer(reluLayer(dtype=torch.float32))
     model.add_layer(LinearLayer(2,1,dtype=torch.float32))#5
     model.add_layer(reluLayer(dtype=torch.float32))
-    write_dep()
+    write_dep('out')
     with open("out/code.cpp","w",encoding="utf-8") as f:
         print(cpp_code(model.list),file=f)

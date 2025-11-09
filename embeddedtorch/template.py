@@ -1,4 +1,19 @@
-#ifndef func_h
+"""# Cpp Template
+A text tempate to build model into cpp use Eigen (cpp tensors operation tool)
+"""
+cpp_tempalte='''#include "func.hpp"
+Eigen::array<int, 4> F_L{{1, 0, 2, 3}};
+Eigen::array<int, 3> S_1D{{1, 0, 2}};
+{init_layers}
+void set_values(){{
+    {set_values}
+}}
+template <typename T, int inputRank, int outputRank>
+inline Eigen::Tensor<T, outputRank> call_model(const Eigen::Tensor<T, inputRank> &input)
+{{{body}
+    return output;
+}}'''
+funcs_code='''#ifndef func_h
 #define func_h
 #ifdef DEBUG
 #include <iostream>
@@ -539,4 +554,5 @@ Conv(const Eigen::Tensor<T, InputRank> &input,
     return output;
 }
 
-#endif
+#endif'''
+    

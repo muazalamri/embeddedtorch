@@ -1,43 +1,54 @@
+"""# Operitions for model
+contain:
+- addLayer
+- subLayer
+- mulLayer
+- divLayer
+- powLayer
+- matmulLayer
+- catLayer
+- stackLayer
+- meanLayer
+- sumLayer
+- maxLayer
+- minLayer
+- reluLayer
+- sigmoidLayer
+- tanhLayer
+- softmaxLayer
+- logLayer
+- expLayer
+- sqrtLayer
+- absLayer
+"""
 import torch
 import torch.nn.functional as F
 from cpp import activiton2cpp
 class addLayer(torch.nn.Module):
-    def __init__(self):
-        super(addLayer, self).__init__()
-
     def forward(self, x1, x2):
         return x1 + x2
     def to_cpp(self):
-        return "add(x1, x2)"
+        return "x1 + x2"
 class subLayer(torch.nn.Module):
-    def __init__(self):
-        super(subLayer, self).__init__()
 
     def forward(self, x1, x2):
         return x1 - x2
     def to_cpp(self):
         return "sub(x1, x2)"
 class mulLayer(torch.nn.Module):
-    def __init__(self):
-        super(mulLayer, self).__init__()
 
     def forward(self, x1, x2):
         return x1 * x2
     def to_cpp(self):
         return "mul(x1, x2)"
 class divLayer(torch.nn.Module):
-    def __init__(self):
-        super(divLayer, self).__init__()
 
     def forward(self, x1, x2):
         return x1 / x2
     def to_cpp(self):
         return "div(x1, x2)"
 class powLayer(torch.nn.Module):
-    def __init__(self):
-        super(powLayer, self).__init__()
-
-    def forward(self, x1, x2):
+    def forward(self, x1 : torch.tensor, x2 : torch.scalar_tensor):
         return x1 ** x2
     def to_cpp(self):
         return "pow(x1, x2)"
@@ -73,7 +84,7 @@ class meanLayer(torch.nn.Module):
         self.dim = dim
         self.keepdim = keepdim
 
-    def forward(self, x):
+    def forward(self, x : torch.tensor):
         return torch.mean(x, dim=self.dim, keepdim=self.keepdim)
     def to_cpp(self):
         return f"mean(x, {self.dim}, {str(self.keepdim).lower()})"
