@@ -1,7 +1,8 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
-from ..cpp import tensor2cpp,linear2cpp,conv2D2cpp,conv1D2cpp,conv3D2cpp
+import sys
+sys.path.append("../")
 
 class UpSample2dLayer(nn.Module):
     def __init__(self, size=None, scale_factor=None, mode='nearest', align_corners=None,dtype=torch.float32):

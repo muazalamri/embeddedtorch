@@ -1,3 +1,8 @@
+import torch
+import torch.nn.functional as F
+from torch import nn
+import sys
+sys.path.append("../")
 class models_col(nn.Module):
     def __init__(self, models:list):
         super(models_col, self).__init__()

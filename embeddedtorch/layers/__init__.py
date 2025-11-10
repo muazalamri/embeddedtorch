@@ -19,13 +19,13 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from cpp import tensor2cpp,linear2cpp,conv2D2cpp,conv1D2cpp,conv3D2cpp
-from ops_collections import *
-from conv import *
-from embedding import *
-from linear import *
-from norms import *
-from pooling import *
-from upsample import *
+from .ops_collections import *
+from .conv import *
+from .embedding import *
+from .linear import *
+from .norms import *
+from .pooling import *
+from .upsample import *
 class EmbaeddableModel(nn.Module):
     def __init__(self, dtype):
         super().__init__()

@@ -12,7 +12,12 @@ EmbeddedTorch is a powerful Python library that allows you to convert PyTorch ne
 - 🎯 **Type-Safe**: Support for different data types (float32, float64, etc.)
 - 🔧 **Flexible**: Custom layer definitions and model composition support
 - 🏗️ **Production-Ready**: Generate clean, optimized C++ code
+<!--
+## Benchmark
 
+|model name|parms(float)| 10^6 iterarion time on c++ | memory |
+|----------|------------|----------------------------|--------|
+-->
 ## Quick Start
 
 ```python

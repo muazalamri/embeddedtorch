@@ -1,7 +1,9 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
-from ..cpp import tensor2cpp,linear2cpp,conv2D2cpp,conv1D2cpp,conv3D2cpp
+import sys
+from cpp import tensor2cpp,linear2cpp,conv2D2cpp,conv1D2cpp,conv3D2cpp
+sys.path.append("../")
 
 class LinearLayer(nn.Module):
     def __init__(self, in_features, out_features, bias=True,dtype=torch.float32):

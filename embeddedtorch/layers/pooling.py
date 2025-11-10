@@ -1,7 +1,8 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
-from ..cpp import tensor2cpp,linear2cpp,conv2D2cpp,conv1D2cpp,conv3D2cpp
+import sys
+sys.path.append("../")
 class MaxPool2dLayer(nn.Module):
     def __init__(self, kernel_size=(2,2), stride=(2,2),dtype=torch.float32):
         super(MaxPool2dLayer, self).__init__()

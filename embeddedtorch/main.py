@@ -6,9 +6,9 @@ from operitions import reluLayer
 
 if __name__=="__main__":
     model=EmbaeddableModel(torch.float32)
-    model.add_layer(Conv1dLayer(2,2,1,1,(0,1)))
+    """model.add_layer(Conv1dLayer(2,2,1,1,(0,1)))
     model.add_layer(MaxPool1dLayer((2,2)))
-    model.add_layer(flattenLayer(4))
+    model.add_layer(flattenLayer(4))"""
     model.add_layer(LinearLayer(16,8,dtype=torch.float32))#2
     model.add_layer(reluLayer(dtype=torch.float32))
     model.add_layer(LinearLayer(8,4,dtype=torch.float32))#3
@@ -19,4 +19,4 @@ if __name__=="__main__":
     model.add_layer(reluLayer(dtype=torch.float32))
     write_dep('out')
     with open("out/code.cpp","w",encoding="utf-8") as f:
-        print(cpp_code(model.list),file=f)
+        print(cpp_code(model.list,'folder'),file=f)

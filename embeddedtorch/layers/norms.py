@@ -1,7 +1,8 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
-from ..cpp import tensor2cpp,linear2cpp,conv2D2cpp,conv1D2cpp,conv3D2cpp
+import sys
+sys.path.append("../")
 
 class batchNorm1dLayer(torch.nn.Module):
     def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, dtype=torch.float32):

@@ -1,7 +1,9 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
-from ..cpp import tensor2cpp,linear2cpp,conv2D2cpp,conv1D2cpp,conv3D2cpp
+import sys
+sys.path.append("../")
+from cpp import tensor2cpp,conv2D2cpp,conv1D2cpp,conv3D2cpp
 
 class Conv2dLayer(nn.Module):
         def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True,dtype=torch.float32):
