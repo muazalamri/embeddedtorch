@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "~/ML/lib64/python3.11/site-packages",
+        "/embeddedtorch"
+    ]
+}
