@@ -12,7 +12,7 @@ class UpSample2dLayer(nn.Module):
 
     def forward(self, x:torch.Tensor):
         return self.upsample(x)
-    def to_cpp(self):
+    def to_cpp(self, layer_num:int):
         return f"upsample2d(x, {self.upsample.size}, {self.upsample.scale_factor}, {self.upsample.mode}, {self.upsample.align_corners}), {self.dtype})"
 class UpSample3dLayer(nn.Module):
     def __init__(self, size:None|tuple[int,int]=None,dtype:torch.dtype=torch.float32):
@@ -22,7 +22,7 @@ class UpSample3dLayer(nn.Module):
 
     def forward(self, x:torch.Tensor):
         return self.upsample(x)
-    def to_cpp(self):
+    def to_cpp(self, layer_num:int):
         return f"upsample3d(x, {self.upsample.size}, {self.upsample.scale_factor}, {self.upsample.mode}, {self.upsample.align_corners}), {self.dtype})"
 class UpSample1dLayer(nn.Module):
     def __init__(self, size:None|tuple[int,int]=None,dtype:torch.dtype=torch.float32):
@@ -32,5 +32,5 @@ class UpSample1dLayer(nn.Module):
 
     def forward(self, x:torch.Tensor):
         return self.upsample(x)
-    def to_cpp(self):
+    def to_cpp(self, layer_num:int):
         return f"upsample1d(x, {self.upsample.size}, {self.upsample.scale_factor}, {self.upsample.mode}, {self.upsample.align_corners}), {self.dtype})"

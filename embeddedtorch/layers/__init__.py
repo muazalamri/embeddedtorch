@@ -58,7 +58,7 @@ class reshapeLayer(torch.nn.Module):
 
     def forward(self, x:torch.Tensor):
         return torch.reshape(x, self.shape)
-    def to_cpp(self):
+    def to_cpp(self, layer_num:int):
         return f"reshape(x, {self.shape},{self.dtype})"
 class dropoutLayer(torch.nn.Module):
     def __init__(self, p:float=0.5,dtype:torch.dtype=torch.float32):
@@ -68,5 +68,5 @@ class dropoutLayer(torch.nn.Module):
 
     def forward(self, x:torch.Tensor):
         return F.dropout(x, p=self.p, training=self.training)
-    def to_cpp(self):
+    def to_cpp(self, layer_num:int):
         return f"dropout(x, {self.p}), {self.dtype})"

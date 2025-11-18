@@ -6,11 +6,11 @@ sys.path.append("../")
 
 class EmbeddingLayer(nn.Module):
     def __init__(self, num_embeddings, embedding_dim, padding_idx=None, max_norm=None, norm_type=2.0, scale_grad_by_freq=False, sparse=False,dtype=torch.float32):
-        super(EmbeddingLayer, self).__init__()
+        super(EmbeddingLayer, self).__init__() # type: ignore
         self.embedding = nn.Embedding(num_embeddings, embedding_dim, padding_idx=padding_idx, max_norm=max_norm, norm_type=norm_type, scale_grad_by_freq=scale_grad_by_freq, sparse=sparse).to(dtype)
         self.dtype = dtype
 
-    def forward(self, x):
+    def forward(self, x:torch.Tensor):
         return self.embedding(x)
-    def to_cpp(self):
+    def to_cpp(self, layer_num:int):
         return f"embedding(x, weight, {self.embedding.num_embeddings}, {self.embedding.embedding_dim}, {self.embedding.padding_idx}), {self.dtype})"
