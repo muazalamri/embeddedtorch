@@ -1,11 +1,11 @@
 import torch
-import torch.nn.functional as F
+import torch.nn.functional as F # type: ignore
 from torch import nn
 import sys
 sys.path.append("../")
 
 class batchNorm1dLayer(torch.nn.Module):
-    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, dtype=torch.float32):
+    def __init__(self, num_features:int, eps:float=1e-5, momentum:float=0.1, affine:bool=True, dtype:torch.dtype=torch.float32):
         super(batchNorm1dLayer, self).__init__() # type: ignore
         self.bn = nn.BatchNorm1d(num_features, eps=eps, momentum=momentum, affine=affine).to(dtype)
         self.dtype = dtype
@@ -15,7 +15,7 @@ class batchNorm1dLayer(torch.nn.Module):
     def to_cpp(self, layer_num:int):
         return f"batch_norm_1d(x,{self.bn.num_features}, {self.bn.eps}, {self.bn.momentum}, {self.bn.affine}), {self.dtype})"
 class batchNorm2dLayer(torch.nn.Module):
-    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, dtype=torch.float32):
+    def __init__(self, num_features:int, eps:float=1e-5, momentum:float=0.1, affine:bool=True, dtype:torch.dtype=torch.float32):
         super(batchNorm2dLayer, self).__init__() # type: ignore
         self.bn = nn.BatchNorm2d(num_features, eps=eps, momentum=momentum, affine=affine).to(dtype)
         self.dtype = dtype
@@ -25,7 +25,7 @@ class batchNorm2dLayer(torch.nn.Module):
     def to_cpp(self, layer_num:int):
         return f"batch_norm_2d(x,{self.bn.num_features}, {self.bn.eps}, {self.bn.momentum}, {self.bn.affine}), {self.dtype})"
 class batchNorm3dLayer(torch.nn.Module):
-    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, dtype=torch.float32):
+    def __init__(self, num_features:int, eps:float=1e-5, momentum:float=0.1, affine:bool=True, dtype:torch.dtype=torch.float32):
         super(batchNorm3dLayer, self).__init__() # type: ignore
         self.bn = nn.BatchNorm3d(num_features, eps=eps, momentum=momentum, affine=affine).to(dtype)
         self.dtype = dtype
@@ -35,7 +35,7 @@ class batchNorm3dLayer(torch.nn.Module):
     def to_cpp(self, layer_num:int):
         return f"batch_norm_3d(x,{self.bn.num_features}, {self.bn.eps}, {self.bn.momentum}, {self.bn.affine}), {self.dtype})"
 class LayerNorm1dLayer(nn.Module):
-    def __init__(self, normalized_shape, eps=1e-5, elementwise_affine=True,dtype=torch.float32):
+    def __init__(self, normalized_shape:torch.Size, eps:float=1e-5, elementwise_affine:bool=True,dtype:torch.dtype=torch.float32):
         super(LayerNorm1dLayer, self).__init__() # type: ignore
         self.ln = nn.LayerNorm(normalized_shape, eps=eps, elementwise_affine=elementwise_affine).to(dtype)
         self.dtype = dtype
@@ -45,7 +45,7 @@ class LayerNorm1dLayer(nn.Module):
     def to_cpp(self, layer_num:int):
         return f"layer_norm_1d(x,{self.ln.normalized_shape}, {self.ln.eps}, {self.ln.elementwise_affine}), {self.dtype})"
 class LayerNorm2dLayer(nn.Module):
-    def __init__(self, normalized_shape, eps=1e-5, elementwise_affine=True,dtype=torch.float32):
+    def __init__(self, normalized_shape:torch.Size, eps:float=1e-5, elementwise_affine:bool=True,dtype:torch.dtype=torch.float32):
         super(LayerNorm2dLayer, self).__init__() # type: ignore
         self.ln = nn.LayerNorm(normalized_shape, eps=eps, elementwise_affine=elementwise_affine).to(dtype)
         self.dtype = dtype
@@ -55,7 +55,7 @@ class LayerNorm2dLayer(nn.Module):
     def to_cpp(self, layer_num:int):
         return f"layer_norm_2d(x,{self.ln.normalized_shape}, {self.ln.eps}, {self.ln.elementwise_affine}), {self.dtype})"
 class LayerNorm3dLayer(nn.Module):
-    def __init__(self, normalized_shape, eps=1e-5, elementwise_affine=True,dtype=torch.float32):
+    def __init__(self, normalized_shape:torch.Size, eps:float=1e-5, elementwise_affine:bool=True,dtype:torch.dtype=torch.float32):
         super(LayerNorm3dLayer, self).__init__() # type: ignore
         self.ln = nn.LayerNorm(normalized_shape, eps=eps, elementwise_affine=elementwise_affine).to(dtype)
         self.dtype = dtype

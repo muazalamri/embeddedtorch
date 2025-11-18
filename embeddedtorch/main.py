@@ -1,4 +1,4 @@
-from layers import EmbaeddableModel,LinearLayer,flattenLayer,Conv1dLayer,MaxPool1dLayer
+from layers import EmbaeddableModel,LinearLayer
 from cpp import cpp_code,write_dep
 import torch
 from operitions import reluLayer

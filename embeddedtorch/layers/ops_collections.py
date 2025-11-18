@@ -16,9 +16,9 @@ class models_col(nn.Module):
         code=""
         for model in self.models:
             code+=model.to_cpp()+"\n" # type: ignore
-        return code
+        return code # type: ignore
 class models_row(nn.Module):
-    def __init__(self, models:list,split_points:list[int],split_dim:int=1):
+    def __init__(self, models:nn.ModuleList,split_points:list[int],split_dim:int=1):
         super(models_row, self).__init__() # type: ignore
         self.models = nn.ModuleList(models)
         self.split_points = split_points
@@ -28,8 +28,8 @@ class models_row(nn.Module):
         split_x = torch.split(x, self.split_points, dim=1)
         outputs = [model(part) for model, part in zip(self.models, split_x)]
         return torch.cat(outputs, dim=1)
-    def to_cpp(self, layer_num:int):
+    def to_cpp(self, layer_num:int)->str:
         code=""
         for model in self.models:
-            code+=model.to_cpp()+"\n"
-        return code
+            code+=model.to_cpp()+"\n" # type: ignore
+        return code # type: ignore
