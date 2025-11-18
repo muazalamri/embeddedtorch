@@ -1,21 +1,21 @@
 import torch
-import torch.nn.functional as F
+import torch.nn.functional as F # type: ignore
 from torch import nn
 import sys
 sys.path.append("../")
 class models_col(nn.Module):
-    def __init__(self, models:list):
-        super(models_col, self).__init__()
+    def __init__(self, models:nn.ModuleList):
+        super(models_col, self).__init__() # type: ignore
         self.models = nn.ModuleList(models)
 
-    def forward(self, x):
+    def forward(self, x:torch.Tensor):
         for model in self.models:
             x = model(x)
         return x
-    def to_cpp(self):
+    def to_cpp(self)->str:
         code=""
         for model in self.models:
-            code+=model.to_cpp()+"\n"
+            code+=model.to_cpp()+"\n" # type: ignore
         return code
 class models_row(nn.Module):
     def __init__(self, models:list,split_points:list[int],split_dim:int=1):

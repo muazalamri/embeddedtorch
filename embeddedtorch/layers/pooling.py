@@ -1,5 +1,5 @@
 import torch
-import torch.nn.functional as F
+import torch.nn.functional as F # type: ignore
 from torch import nn
 import sys
 sys.path.append("../")
@@ -23,16 +23,16 @@ class MaxPool1dLayer(nn.Module):
 
     def forward(self, x:torch.Tensor):
         return self.pool(x)
-    def to_cpp(self,layer_num):
+    def to_cpp(self,layer_num:int):
         self.pool.padding
-        return "", "", f"max_pool1d<float>(input{'_'+str(layer_num-1) if layer_num<0 else ''}, {self.pool.kernel_size[0]}, {self.pool.kernel_size[1]}, {self.pool.stride[0]}, {self.pool.stride[1]}, {self.pool.padding}, 0);"
+        return "", "", f"max_pool1d<float>(input{'_'+str(layer_num-1) if layer_num<0 else ''}, {int(self.pool.kernel_size[0])}, {int(self.pool.kernel_size[1])}, {int(self.pool.stride[0])}, {int(self.pool.stride[1])}, {self.pool.padding}, 0);" # type: ignore
 class MaxPool3dLayer(nn.Module):
-    def __init__(self, kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False,dtype=torch.float32):
-        super(MaxPool3dLayer, self).__init__()
+    def __init__(self, kernel_size:int, stride:None|tuple[int,int,int]=None, padding:int=0, dilation:int=1, return_indices:bool=False, ceil_mode:bool=False,dtype:torch.dtype=torch.float32):
+        super().__init__() # type: ignore
         self.pool = nn.MaxPool3d(kernel_size, stride=stride, padding=padding, dilation=dilation, return_indices=return_indices, ceil_mode=ceil_mode).to(dtype)
         self.dtype = dtype
 
-    def forward(self, x):
+    def forward(self, x:torch.Tensor):
         return self.pool(x)
-    def to_cpp(self):
-        return f"max_pool3d(x, {self.pool.kernel_size}, {self.pool.stride}, {self.pool.padding}, {self.pool.dilation}, {self.pool.ceil_mode}), {self.dtype})"
+    def to_cpp(self,layer_num:int):
+        return f"max_pool3d<float>(input{'_'+str(layer_num-1) if layer_num<0 else ''}, {self.pool.kernel_size}, {self.pool.stride}, {self.pool.padding}, {self.pool.dilation}, {self.pool.ceil_mode}), {self.dtype})"

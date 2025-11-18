@@ -28,7 +28,7 @@ class Conv1dLayer(nn.Module):
         return conv1D2cpp(layer_num=layer_num,kerVal=tensor2cpp(self.conv.weight,torch.dtype),chanel_in=self.conv.in_channels,chanel_out=self.conv.out_channels,kernal_size=self.conv.kernel_size,padding_left=int(self.conv.padding[0]),padding_right=0,stridesVal=tensor2cpp(torch.tensor(self.conv.stride),dtype=float))
 class Conv3dLayer(nn.Module):
     def __init__(self, in_channels:int, out_channels:int, kernel_size:int, stride=1:int, padding:int=0, dilation:int=1, groups:int=1, bias:bool=True,dtype:torch.dtype=torch.float32):
-        super(Conv3dLayer, self).__init__()
+        super(Conv3dLayer, self).__init__() # type: ignore
         self.conv = nn.Conv3d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, dilation=dilation, groups=groups, bias=bias).to(dtype)
         self.dtype = dtype
 
